@@ -43,9 +43,9 @@ const Cart = () => {
             <p className="text-muted-foreground text-sm sm:text-base">{items.length} item(s) in your cart</p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
             {/* Cart Items */}
-            <div className="lg:col-span-2 space-y-4">
+            <div className="lg:col-span-2 space-y-3 sm:space-y-4">
               {items.map((item) => (
                 <div
                   key={item.product.id}
@@ -113,8 +113,8 @@ const Cart = () => {
                 </div>
               ))}
 
-              <div className="pt-4">
-                <Button variant="outline" onClick={clearCart}>
+              <div className="pt-3 sm:pt-4">
+                <Button variant="outline" onClick={clearCart} className="w-full sm:w-auto">
                   Clear Cart
                 </Button>
               </div>
@@ -122,19 +122,19 @@ const Cart = () => {
 
             {/* Order Summary */}
             <div className="lg:col-span-1">
-              <div className="bg-card rounded-2xl border border-border p-6 sticky top-24">
-                <h2 className="text-xl font-bold text-foreground mb-6">Order Summary</h2>
+              <div className="bg-card rounded-xl sm:rounded-2xl border border-border p-4 sm:p-6 lg:sticky lg:top-24">
+                <h2 className="text-lg sm:text-xl font-bold text-foreground mb-4 sm:mb-6">Order Summary</h2>
 
-                <div className="space-y-4 mb-6">
-                  <div className="flex justify-between text-muted-foreground">
+                <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
+                  <div className="flex justify-between text-muted-foreground text-sm sm:text-base">
                     <span>Subtotal</span>
                     <span>{formatPrice(getTotal())}</span>
                   </div>
-                  <div className="flex justify-between text-muted-foreground">
+                  <div className="flex justify-between text-muted-foreground text-sm sm:text-base">
                     <span>Shipping</span>
                     <span>{getTotal() >= 500 ? 'Free' : formatPrice(25)}</span>
                   </div>
-                  <div className="border-t border-border pt-4 flex justify-between text-lg font-bold text-foreground">
+                  <div className="border-t border-border pt-3 sm:pt-4 flex justify-between text-base sm:text-lg font-bold text-foreground">
                     <span>Total</span>
                     <span>{formatPrice(getTotal() + (getTotal() >= 500 ? 0 : 25))}</span>
                   </div>
@@ -146,7 +146,7 @@ const Cart = () => {
                   </Button>
                 </Link>
 
-                <p className="text-xs text-muted-foreground text-center mt-4">
+                <p className="text-xs text-muted-foreground text-center mt-3 sm:mt-4">
                   Free shipping on orders over $500
                 </p>
               </div>
