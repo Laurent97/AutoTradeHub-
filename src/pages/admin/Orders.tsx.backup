@@ -1,0 +1,832 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../lib/supabase/client';
+import { Order, PartnerProfile, OrderStatus, PaymentStatus } from '../../lib/types/database';
+import { NotificationService } from '../../lib/supabase/notification-service';
+import Navbar from '../../components/Navbar';
+import Footer from '../../components/Footer';
+import AdminSidebar from '../../components/Admin/AdminSidebar';
+
+interface LogisticsForm {
+  shipping_provider: string;
+  tracking_number: string;
+  estimated_delivery: string;
+  current_status: string;
+}
+
+interface OrderWithDetails extends Order {
+  customer?: {
+    id: string;
+    email: string;
+    full_name?: string;
+  };
+  partner?: PartnerProfile;
+}
+
+export default function AdminOrders() {
+  const navigate = useNavigate();
+  const { user, userProfile } = useAuth();
+  
+  const [orders, setOrders] = useState<OrderWithDetails[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState<OrderStatus | 'all'>('all');
+  const [selectedOrder, setSelectedOrder] = useState<OrderWithDetails | null>(null);
+  const [showOrderModal, setShowOrderModal] = useState(false);
+  const [showLogisticsModal, setShowLogisticsModal] = useState(false);
+  const [logisticsForm, setLogisticsForm] = useState<LogisticsForm>({
+    shipping_provider: '',
+    tracking_number: '',
+    estimated_delivery: '',
+    current_status: 'processing'
+  });
+  const [orderDetails, setOrderDetails] = useState<OrderWithDetails | null>(null);
+  const [partners, setPartners] = useState<PartnerProfile[]>([]);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [selectedPartner, setSelectedPartner] = useState('');
+  const [showCreateOrderModal, setShowCreateOrderModal] = useState(false);
+  const [newOrder, setNewOrder] = useState({
+    customer_email: '',
+    customer_name: '',
+    partner_id: '',
+    product_id: '',
+    quantity: 1,
+    unit_price: 0,
+    shipping_address: {
+      address: '',
+      city: '',
+      country: '',
+      phone: ''
+    }
+  });
+  const [partnerProducts, setPartnerProducts] = useState<any[]>([]);
+  const [selectedPartnerProducts, setSelectedPartnerProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (userProfile?.user_type !== 'admin') {
+      navigate('/');
+      return;
+    }
+
+    loadOrders();
+    loadPartners();
+  }, [userProfile, navigate]);
+
+  useEffect(() => {
+    filterOrders();
+  }, [orders, searchTerm, filterStatus]);
+
+  const loadOrders = async () => {
+    setLoading(true);
+    
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      
+      setOrders(data || []);
+    } catch (error) {
+      console.error('Error loading orders:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadPartners = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('partner_profiles')
+        .select('id, store_name, user_id')
+        .eq('partner_status', 'approved');
+
+      if (error) throw error;
+      
+      setPartners(data || []);
+    } catch (error) {
+      console.error('Error loading partners:', error);
+    }
+  };
+
+  const loadPartnerProducts = async (partnerId: string) => {
+    if (!partnerId) {
+      setPartnerProducts([]);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('partner_products')
+        .select(`
+          *,
+          product:products (
+            id,
+            title,
+            sku,
+            original_price,
+            images,
+            make,
+            model,
+            category,
+            stock_quantity
+          )
+        `)
+        .eq('partner_id', partnerId)
+        .eq('is_active', true);
+
+      if (error) throw error;
+      
+      setPartnerProducts(data || []);
+    } catch (error) {
+      console.error('Error loading partner products:', error);
+      setPartnerProducts([]);
+    }
+  };
+
+  const filteredOrders = orders.filter(order => {
+    const matchesSearch = 
+      order.order_number.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = filterStatus === 'all' || order.status === filterStatus;
+    
+    return matchesSearch && matchesStatus;
+  });
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  const openOrderModal = async (order: Order) => {
+    setSelectedOrder(order);
+    await loadOrderDetails(order.id);
+    setShowOrderModal(true);
+  };
+
+  const loadOrderDetails = async (orderId: string) => {
+    try {
+      const { data: order, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', orderId)
+        .single();
+
+      if (error) throw error;
+      
+      // Load customer info
+      const { data: customer } = await supabase
+        .from('users')
+        .select('email, full_name')
+        .eq('id', order.customer_id)
+        .single();
+      
+      let partner = undefined;
+      if (order.partner_id) {
+        const { data: partnerData } = await supabase
+          .from('partner_profiles')
+          .select('store_name')
+          .eq('id', order.partner_id)
+          .single();
+        partner = partnerData;
+      }
+      
+      // Load logistics info
+      const { data: logistics } = await supabase
+        .from('logistics_tracking')
+        .select('*')
+        .eq('order_id', orderId)
+        .single();
+
+      setOrderDetails({
+        ...order,
+        customer,
+        partner,
+        logistics
+      });
+    } catch (error) {
+      console.error('Error loading order details:', error);
+    }
+  };
+
+  const assignToPartner = async (orderId: string, partnerId: string) => {
+    if (!partnerId) {
+      alert('Please select a partner');
+      return;
+    }
+
+    try {
+      // Update order with partner info
+      const { error } = await supabase
+        .from('orders')
+        .update({
+          partner_id: partnerId,
+          status: 'confirmed',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', orderId);
+
+      if (error) throw error;
+
+      // Create order items record
+      const { data: orderData } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', orderId)
+        .single();
+
+      if (orderData) {
+        const { error: itemError } = await supabase
+          .from('order_items')
+          .insert({
+            order_id: orderId,
+            product_id: orderData.product_id,
+            partner_product_id: partnerProducts.find(p => p.id === orderData.product_id)?.id,
+            quantity: orderData.quantity,
+            unit_price: orderData.unit_price,
+            subtotal: orderData.quantity * orderData.unit_price,
+            created_at: new Date().toISOString()
+          });
+
+        if (itemError) throw itemError;
+      }
+
+      await NotificationService.notifyOrderAssigned(orderId, partnerId);
+
+      setShowAssignModal(false);
+      setSelectedPartner('');
+      loadOrders();
+      loadOrderDetails(orderId);
+      alert('Order assigned to partner successfully!');
+    } catch (error) {
+      console.error('Error assigning order to partner:', error);
+      alert('Failed to assign order to partner. Please try again.');
+    }
+  };
+
+  const saveLogisticsInfo = async () => {
+    if (!selectedOrder) return;
+
+    if (!logisticsForm.shipping_provider || !logisticsForm.tracking_number) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      // Save logistics info
+      const { error } = await supabase
+        .from('logistics_tracking')
+        .upsert({
+          order_id: selectedOrder.id,
+          shipping_provider: logisticsForm.shipping_provider,
+          tracking_number: logisticsForm.tracking_number,
+          estimated_delivery: logisticsForm.estimated_delivery,
+          current_status: logisticsForm.current_status
+        })
+        .eq('order_id', selectedOrder.id);
+
+      if (error) throw error;
+
+      // Update order status
+      const { error: updateError } = await supabase
+        .from('orders')
+        .update({
+          status: 'shipped',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', selectedOrder.id);
+
+      if (updateError) throw updateError;
+
+      setShowLogisticsModal(false);
+      loadOrders();
+      loadOrderDetails(selectedOrder.id);
+      alert('Logistics information saved and order marked as shipped');
+    } catch (error) {
+      console.error('Error saving logistics:', error);
+      alert('Failed to save logistics information. Please try again.');
+    }
+  };
+
+  const createNewOrder = async () => {
+    if (!newOrder.customer_email || !newOrder.partner_id || !newOrder.product_id || newOrder.unit_price <= 0) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      // Generate order number
+      const orderNumber = 'ORD-' + Date.now().toString().slice(-8);
+      
+      // Create the order
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          order_number: orderNumber,
+          customer_id: '00000000-0000-0000-0000-000000000000', // Placeholder customer ID
+          partner_id: newOrder.partner_id,
+          total_amount: newOrder.quantity * newOrder.unit_price,
+          status: 'confirmed', // Start as confirmed since partner is assigned
+          shipping_address: newOrder.shipping_address,
+          payment_status: 'pending',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      // Create order items record
+      const { error: itemError } = await supabase
+        .from('order_items')
+        .insert({
+          order_id: order.id,
+          product_id: newOrder.product_id,
+          partner_product_id: partnerProducts.find(p => p.id === newOrder.product_id)?.id,
+          quantity: newOrder.quantity,
+          unit_price: newOrder.unit_price,
+          subtotal: newOrder.quantity * newOrder.unit_price,
+          created_at: new Date().toISOString()
+        });
+
+      if (itemError) throw itemError;
+
+      setShowCreateOrderModal(false);
+      setNewOrder({
+        customer_email: '',
+        customer_name: '',
+        partner_id: '',
+        product_id: '',
+        quantity: 1,
+        unit_price: 0,
+        shipping_address: {
+          address: '',
+          city: '',
+          country: '',
+          phone: ''
+        }
+      });
+      loadOrders();
+      alert('Order created successfully!');
+    } catch (error) {
+      console.error('Failed to create order:', error);
+      alert('Failed to create order. Please try again.');
+    }
+  };
+
+  const isProductAdded = (productId: string) => {
+    return partnerProducts.some(pp => pp.product_id === productId);
+  };
+
+  const getPartnerProduct = (productId: string) => {
+    return partnerProducts.find(pp => pp.product_id === productId);
+  };
+
+  if (loading && orders.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      <div className="flex">
+        <AdminSidebar />
+        <main className="flex-1 p-6">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Orders Management</h1>
+            <p className="text-gray-600 mb-6">Manage and track all orders in the system</p>
+          </div>
+
+          {/* Filters */}
+          <div className="bg-white rounded-lg shadow p-6 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  🔍 Search Orders
+                </label>
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search by order number..."
+                  style={{ backgroundColor: 'white', color: '#111827', fontWeight: '500' }}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  📋 Filter by Status
+                </label>
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  style={{ backgroundColor: 'white', color: '#111827', fontWeight: '500' }}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="pending">Pending</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="processing">Processing</option>
+                  <option value="shipped">Shipped</option>
+                  <option value="delivered">Delivered</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+              
+              <div className="flex items-end space-x-3">
+                <button
+                  onClick={() => setShowCreateOrderModal(true)}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  Create New Order
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Orders Table */}
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Order Number
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Customer
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Partner
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Total Amount
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Created
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredOrders.map((order) => (
+                    <tr key={order.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4">
+                        <span className="font-medium text-blue-600">{order.order_number}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div>
+                          <div className="font-medium text-gray-900">{order.customer?.full_name || 'N/A'}</div>
+                          <div className="text-sm text-gray-500">{order.customer?.email || 'N/A'}</div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="font-medium text-gray-900">{order.partner?.store_name || 'N/A'}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="font-bold text-green-600">{formatCurrency(order.total_amount)}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                          order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
+                          order.status === 'processing' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {order.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500">
+                        {formatDate(order.created_at)}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => openOrderModal(order)}
+                            className="text-blue-600 hover:text-blue-800 text-left font-medium"
+                          >
+                            View Details
+                          </button>
+                          {!order.partner_id && (
+                            <button
+                              onClick={() => {
+                                setSelectedOrder(order);
+                                setShowAssignModal(true);
+                              }}
+                              className="text-green-600 hover:text-green-800 text-left font-medium"
+                            >
+                              Assign Partner
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </main>
+      </div>
+      <Footer />
+
+      {/* Order Details Modal */}
+      {showOrderModal && selectedOrder && orderDetails && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  Order Details: {selectedOrder.order_number}
+                </h2>
+                <button
+                  onClick={() => setShowOrderModal(false)}
+                  className="text-gray-400 hover:text-gray-500 text-2xl"
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Customer Information */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Customer Information</h3>
+                  <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+                    <div>
+                      <span className="text-sm font-medium text-gray-600">Name:</span>
+                      <span className="ml-2 font-medium">{orderDetails.customer?.full_name || 'N/A'}</span>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-600">Email:</span>
+                      <span className="ml-2 font-medium">{orderDetails.customer?.email || 'N/A'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Partner Information */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Partner Information</h3>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div>
+                      <span className="text-sm font-medium text-gray-600">Store:</span>
+                      <span className="ml-2 font-medium">{orderDetails.partner?.store_name || 'N/A'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Order Items */}
+                <div className="md:col-span-2">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Order Items</h3>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">Product:</span>
+                        <span>{orderDetails.product_id || 'N/A'}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">Quantity:</span>
+                        <span>{orderDetails.quantity || 0}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">Unit Price:</span>
+                        <span>{formatCurrency(orderDetails.unit_price || 0)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">Subtotal:</span>
+                        <span>{formatCurrency((orderDetails.quantity || 0) * (orderDetails.unit_price || 0))}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Shipping Address */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                    Shipping Address
+                  </h3>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    {orderDetails.shipping_address ? (
+                      <div>
+                        <div>Address: {orderDetails.shipping_address.address}</div>
+                        <div>Phone: {orderDetails.shipping_address.phone}</div>
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-sm">No shipping address provided</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Logistics Information */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                    Logistics Information
+                  </h3>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    {orderDetails.logistics ? (
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium">Shipping Provider:</span>
+                          <span className="font-medium">{orderDetails.logistics.shipping_provider}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium">Tracking Number:</span>
+                          <span className="font-medium">{orderDetails.logistics.tracking_number}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium">Estimated Delivery:</span>
+                          <span className="font-medium">{orderDetails.logistics.estimated_delivery}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium">Current Status:</span>
+                          <span className="font-medium">{orderDetails.logistics.current_status}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-sm">No logistics information available</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-6">
+                  <button
+                    onClick={() => setShowOrderModal(false)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  >
+                    Close
+                  </button>
+                  <button
+                    onClick={() => openLogisticsModal(selectedOrder)}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                  >
+                    Update Shipping
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Assign Partner Modal */}
+      {showAssignModal && selectedOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                Assign Partner to Order {selectedOrder.order_number}
+              </h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Select Partner *
+                  </label>
+                  <select
+                    value={selectedPartner}
+                    onChange={(e) => setSelectedPartner(e.target.value)}
+                    style={{ backgroundColor: 'white', color: '#111827', fontWeight: '500' }}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  >
+                    <option value="">Choose a partner...</option>
+                    {partners.map((partner) => (
+                      <option key={partner.id} value={partner.id}>
+                        {partner.store_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex justify-end space-x-3">
+                  <button
+                    onClick={() => setShowAssignModal(false)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => assignToPartner(selectedOrder.id, selectedPartner)}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  >
+                    Assign Partner
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Logistics Modal */}
+      {showLogisticsModal && selectedOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                Update Logistics: {selectedOrder.order_number}
+              </h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Shipping Provider *
+                  </label>
+                  <select
+                    value={logisticsForm.shipping_provider}
+                    onChange={(e) => setLogisticsForm({...logisticsForm, shipping_provider: e.target.value})}
+                    style={{ backgroundColor: 'white', color: '#111827', fontWeight: '500' }}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  >
+                    <option value="">Select Provider</option>
+                    <option value="DHL">DHL Express</option>
+                    <option value="FedEx">FedEx</option>
+                    <option value="UPS">UPS</option>
+                    <option value="USPS">USPS</option>
+                    <option value="TNT">TNT</option>
+                    <option value="EMS">EMS</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Tracking Number *
+                  </label>
+                  <input
+                    type="text"
+                    value={logisticsForm.tracking_number}
+                    onChange={(e) => setLogisticsForm({...logisticsForm, tracking_number: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Estimated Delivery Date *
+                  </label>
+                  <input
+                    type="date"
+                    value={logisticsForm.estimated_delivery}
+                    onChange={(e) => setLogisticsForm({...logisticsForm, estimated_delivery: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Current Status *
+                  </label>
+                  <select
+                    value={logisticsForm.current_status}
+                    onChange={(e) => setLogisticsForm({...logisticsForm, current_status: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  >
+                    <option value="processing">Processing</option>
+                    <option value="picked_up">Picked Up</option>
+                    <option value="in_transit">In Transit</option>
+                    <option value="out_for_delivery">Out for Delivery</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="delayed">Delayed</option>
+                  </select>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-6">
+                  <button
+                    onClick={() => setShowLogisticsModal(false)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={saveLogisticsInfo}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                  >
+                    Save & Mark as Shipped
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
