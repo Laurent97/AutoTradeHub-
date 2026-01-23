@@ -41,7 +41,7 @@ export default function Contact() {
                   <Mail className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
                   <div>
                     <h3 className="font-bold mb-1">Email</h3>
-                    <p className="text-muted-foreground">support@autovault.com</p>
+                    <p className="text-muted-foreground">support@autotradehub.com</p>
                     <p className="text-muted-foreground text-sm">Response within 24 hours</p>
                   </div>
                 </div>
@@ -52,7 +52,7 @@ export default function Contact() {
                   <Phone className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
                   <div>
                     <h3 className="font-bold mb-1">Phone</h3>
-                    <p className="text-muted-foreground">1-800-AUTO-VAULT</p>
+                    <p className="text-muted-foreground">+44 7719 924445</p>
                     <p className="text-muted-foreground text-sm">Available 24/7</p>
                   </div>
                 </div>
@@ -149,7 +149,7 @@ export default function Contact() {
               {[
                 { q: 'What is your response time?', a: 'We typically respond to emails within 24 hours.' },
                 { q: 'Do you have a physical store?', a: 'We operate online, but we have warehouses in major cities worldwide.' },
-                { q: 'Can I schedule a call?', a: 'Yes, email us at support@autovault.com to schedule a call.' },
+                { q: 'Can I schedule a call?', a: 'Yes, email us at support@autotradehub.com to schedule a call.' },
                 { q: 'What languages do you support?', a: 'We support over 50 languages for customer support.' },
               ].map((faq, idx) => (
                 <div key={idx} className="border-b border-border pb-4 last:border-0">
