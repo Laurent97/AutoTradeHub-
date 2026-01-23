@@ -13,7 +13,7 @@ export default function FirstOrderGuide() {
       <h2>Your First Order on AutoTradeHub</h2>
       <p>Welcome to AutoTradeHub! This comprehensive guide will walk you through placing your first order, from finding the perfect part to completing your purchase.</p>
 
-      <h3>Before You Start</h2>
+      <h3>Before You Start</h3>
       <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800 my-4">
         <h4 className="font-semibold mb-2 flex items-center gap-2">
           <CheckCircle className="w-4 h-4" />
@@ -29,7 +29,7 @@ export default function FirstOrderGuide() {
 
       <h2>Step 1: Find Your Product</h2>
       
-      <h3>Using the Search Bar</h2>
+      <h3>Using the Search Bar</h3>
       <p>The search bar is your best friend for finding specific parts:</p>
       <ul>
         <li>Enter part names, numbers, or keywords</li>
@@ -38,7 +38,7 @@ export default function FirstOrderGuide() {
         <li>Save searches for future use</li>
       </ul>
 
-      <h3>Browse Categories</h2>
+      <h3>Browse Categories</h3>
       <p>If you're not sure what you need:</p>
       <ul>
         <li>Explore categories like Engine, Brakes, Suspension</li>
@@ -49,7 +49,7 @@ export default function FirstOrderGuide() {
 
       <h2>Step 2: Evaluate the Product</h2>
       
-      <h3>Read the Product Details</h2>
+      <h3>Read the Product Details</h3>
       <p>Pay attention to these key details:</p>
       <ul>
         <li><strong>Condition:</strong> New, Used, Reconditioned</li>
@@ -58,7 +58,7 @@ export default function FirstOrderGuide() {
         <li><strong>Warranty:</strong> Return policy and guarantee</li>
       </ul>
 
-      <h3>Check Seller Information</h2>
+      <h3>Check Seller Information</h3>
       <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800 my-4">
         <h4 className="font-semibold mb-2 flex items-center gap-2">
           <AlertCircle className="w-4 h-4" />
@@ -73,7 +73,7 @@ export default function FirstOrderGuide() {
         </ul>
       </div>
 
-      <h3>Ask Questions</h2>
+      <h3>Ask Questions</h3>
       <p>Don't hesitate to contact the seller:</p>
       <ul>
         <li>Ask about compatibility</li>
@@ -84,7 +84,7 @@ export default function FirstOrderGuide() {
 
       <h2>Step 3: Add to Cart</h2>
       
-      <h3>Adding Items</h2>
+      <h3>Adding Items</h3>
       <ol>
         <li>Click "Add to Cart" on the product page</li>
         <li>Choose quantity if needed</li>
@@ -92,7 +92,7 @@ export default function FirstOrderGuide() {
         <li>Continue to checkout</li>
       </ol>
 
-      <h3>Cart Management</h2>
+      <h3>Cart Management</h3>
       <p>From your cart, you can:</p>
       <ul>
         <li>Update quantities</li>
@@ -103,7 +103,7 @@ export default function FirstOrderGuide() {
 
       <h2>Step 4: Checkout Process</h2>
       
-      <h3>Shipping Information</h2>
+      <h3>Shipping Information</h3>
       <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800 my-4">
         <h4 className="font-semibold mb-2 flex items-center gap-2">
           <MapPin className="w-4 h-4" />
@@ -117,7 +117,7 @@ export default function FirstOrderGuide() {
         </ul>
       </div>
 
-      <h3>Payment Options</h2>
+      <h3>Payment Options</h3>
       <p>AutoTradeHub accepts multiple payment methods:</p>
       <ul>
         <li><strong>Credit/Debit Cards:</strong> Visa, Mastercard, Amex</li>
@@ -126,7 +126,7 @@ export default function FirstOrderGuide() {
         <li><strong>Crypto:</strong> Bitcoin, Ethereum</li>
       </ul>
 
-      <h3>Order Review</h2>
+      <h3>Order Review</h3>
       <p>Before paying, double-check:</p>
       <ul>
         <li>Product details and quantities</li>
@@ -137,7 +137,7 @@ export default function FirstOrderGuide() {
 
       <h2>Step 5: Complete Purchase</h2>
       
-      <h3>Payment Security</h2>
+      <h3>Payment Security</h3>
       <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800 my-4">
         <h4 className="font-semibold mb-2 flex items-center gap-2">
           <CreditCard className="w-4 h-4" />
@@ -151,7 +151,7 @@ export default function FirstOrderGuide() {
         </ul>
       </div>
 
-      <h3>Order Confirmation</h2>
+      <h3>Order Confirmation</h3>
       <p>After payment, you'll receive:</p>
       <ul>
         <li>Order confirmation email</li>
@@ -162,7 +162,7 @@ export default function FirstOrderGuide() {
 
       <h2>After Your Order</h2>
       
-      <h3>Track Your Order</h2>
+      <h3>Track Your Order</h3>
       <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800 my-4">
         <h4 className="font-semibold mb-2 flex items-center gap-2">
           <Package className="w-4 h-4" />
@@ -176,7 +176,7 @@ export default function FirstOrderGuide() {
         </ul>
       </div>
 
-      <h3>Communicate with Seller</h2>
+      <h3>Communicate with Seller</h3>
       <p>Stay in touch with the seller:</p>
       <ul>
         <li>Ask about shipping updates</li>
@@ -187,7 +187,7 @@ export default function FirstOrderGuide() {
 
       <h2>Troubleshooting Common Issues</h2>
       
-      <h3>Payment Problems</h2>
+      <h3>Payment Problems</h3>
       <ul>
         <li>Check your card details and billing address</li>
         <li>Ensure sufficient funds are available</li>
@@ -195,7 +195,7 @@ export default function FirstOrderGuide() {
         <li>Contact your bank if declined</li>
       </ul>
 
-      <h3>Shipping Issues</h2>
+      <h3>Shipping Issues</h3>
       <ul>
         <li>Verify your shipping address</li>
         <li>Check if your location is serviced</li>
@@ -203,7 +203,7 @@ export default function FirstOrderGuide() {
         <li>Consider local pickup options</li>
       </ul>
 
-      <h3>Product Issues</h2>
+      <h3>Product Issues</h3>
       <ul>
         <li>Document any damage with photos</li>
         <li>Contact seller immediately</li>
@@ -227,7 +227,7 @@ export default function FirstOrderGuide() {
         </ul>
       </div>
 
-      <h3>Building Trust</h2>
+      <h3>Building Trust</h3>
       <p>As a new buyer:</p>
       <ul>
         <li>Complete your profile verification</li>
@@ -238,7 +238,7 @@ export default function FirstOrderGuide() {
 
       <h2>What to Expect</h2>
       
-      <h3>Delivery Timeline</h2>
+      <h3>Delivery Timeline</h3>
       <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800 my-4">
         <h4 className="font-semibold mb-2 flex items-center gap-2">
           <Clock className="w-4 h-4" />
@@ -252,7 +252,7 @@ export default function FirstOrderGuide() {
         </ul>
       </div>
 
-      <h3>Customer Support</h2>
+      <h3>Customer Support</h3>
       <p>AutoTradeHub support is here to help:</p>
       <ul>
         <li>24/7 live chat support</li>
@@ -281,7 +281,7 @@ export default function FirstOrderGuide() {
       </ul>
 
       <div className="bg-gradient-accent rounded-lg text-white p-6 mt-8 text-center">
-        <h3 className="text-xl font-bold mb-2">Ready to Start?</h2>
+        <h3 className="text-xl font-bold mb-2">Ready to Start?</h3>
         <p className="mb-4">Browse our extensive catalog of automotive parts and accessories</p>
         <a href="/products" className="inline-block bg-white text-primary px-6 py-2 rounded-lg font-medium hover:bg-white/90 transition-colors">
           Start Shopping
