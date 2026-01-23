@@ -119,7 +119,7 @@ export default function Store() {
     // Normalize product data to match cart context expectations
     const normalizedProduct = {
       id: storeProduct.product.id,
-      title: storeProduct.product?.title || `${storeProduct.product.make} ${storeProduct.product.model}`,
+      title: storeProduct.product?.title || storeProduct.product.model || `${storeProduct.product.make} ${storeProduct.product.model}`,
       make: storeProduct.product.make,
       model: storeProduct.product.model,
       description: storeProduct.product.description || 'Quality automotive part',
