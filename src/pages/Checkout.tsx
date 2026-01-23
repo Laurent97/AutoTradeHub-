@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { orderService } from '@/lib/supabase/order-service';
+import { supabase } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -27,14 +28,39 @@ const Checkout = () => {
     city: '',
     state: '',
     postal_code: '',
-    country: '',
-    phone: '',
+    country: 'United States', // Default country
+    phone: user?.user_metadata?.phone || '',
   });
+
+  const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
+  const [useSavedAddress, setUseSavedAddress] = useState(false);
 
   useEffect(() => {
     // Generate order ID on component mount
     setOrderId(`ORD-${Date.now()}`);
-  }, []);
+    
+    // Load saved addresses from user metadata
+    if (user?.user_metadata?.shipping_addresses) {
+      const addresses = user.user_metadata.shipping_addresses;
+      setSavedAddresses(addresses);
+      
+      // If there's a default address, use it
+      const defaultAddress = addresses.find((addr: any) => addr.is_default);
+      if (defaultAddress) {
+        setShippingAddress({
+          full_name: defaultAddress.full_name || user?.user_metadata?.full_name || '',
+          address_line1: defaultAddress.address_line1 || '',
+          address_line2: defaultAddress.address_line2 || '',
+          city: defaultAddress.city || '',
+          state: defaultAddress.state || '',
+          postal_code: defaultAddress.postal_code || '',
+          country: defaultAddress.country || 'United States',
+          phone: defaultAddress.phone || user?.user_metadata?.phone || '',
+        });
+        setUseSavedAddress(true);
+      }
+    }
+  }, [user]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -48,6 +74,94 @@ const Checkout = () => {
   const shipping = subtotal >= 500 ? 0 : 25;
   const total = subtotal + shipping;
 
+  const saveCurrentAddress = async () => {
+    if (!user) return;
+    
+    try {
+      const currentAddresses = user.user_metadata?.shipping_addresses || [];
+      const newAddress = {
+        ...shippingAddress,
+        id: Date.now().toString(),
+        created_at: new Date().toISOString(),
+        is_default: currentAddresses.length === 0, // First address is default
+      };
+      
+      const updatedAddresses = [...currentAddresses, newAddress];
+      
+      // Update user metadata with new address
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          user_metadata: {
+            ...user.user_metadata,
+            shipping_addresses: updatedAddresses,
+          },
+        },
+      });
+      
+      if (error) throw error;
+      
+      setSavedAddresses(updatedAddresses);
+      toast({
+        title: 'Address saved',
+        description: 'Your shipping address has been saved for future orders.',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error saving address',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const selectSavedAddress = (address: any) => {
+    setShippingAddress({
+      full_name: address.full_name,
+      address_line1: address.address_line1,
+      address_line2: address.address_line2,
+      city: address.city,
+      state: address.state,
+      postal_code: address.postal_code,
+      country: address.country,
+      phone: address.phone,
+    });
+    setUseSavedAddress(true);
+  };
+
+  const setAsDefaultAddress = async (addressId: string) => {
+    if (!user) return;
+    
+    try {
+      const updatedAddresses = savedAddresses.map((addr) => ({
+        ...addr,
+        is_default: addr.id === addressId,
+      }));
+      
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          user_metadata: {
+            ...user.user_metadata,
+            shipping_addresses: updatedAddresses,
+          },
+        },
+      });
+      
+      if (error) throw error;
+      
+      setSavedAddresses(updatedAddresses);
+      toast({
+        title: 'Default address updated',
+        description: 'Your default shipping address has been updated.',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error updating default address',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
   const handleShippingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -58,6 +172,19 @@ const Checkout = () => {
         variant: 'destructive',
       });
       navigate('/auth');
+      return;
+    }
+
+    // Validate shipping address
+    const requiredFields = ['full_name', 'address_line1', 'city', 'postal_code', 'country', 'phone'];
+    const missingFields = requiredFields.filter(field => !shippingAddress[field as keyof typeof shippingAddress]);
+    
+    if (missingFields.length > 0) {
+      toast({
+        title: 'Missing information',
+        description: 'Please fill in all required shipping address fields.',
+        variant: 'destructive',
+      });
       return;
     }
 
@@ -261,9 +388,93 @@ const Checkout = () => {
               <div className="grid lg:grid-cols-3 gap-8">
                 {/* Shipping Form */}
                 <div className="lg:col-span-2 space-y-6">
+                  {/* Saved Addresses */}
+                  {savedAddresses.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center justify-between">
+                          Saved Addresses
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setUseSavedAddress(!useSavedAddress)}
+                          >
+                            {useSavedAddress ? 'Use New Address' : 'Use Saved Address'}
+                          </Button>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {savedAddresses.map((address) => (
+                          <div
+                            key={address.id}
+                            className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                              useSavedAddress &&
+                              JSON.stringify(shippingAddress) === JSON.stringify({
+                                full_name: address.full_name,
+                                address_line1: address.address_line1,
+                                address_line2: address.address_line2,
+                                city: address.city,
+                                state: address.state,
+                                postal_code: address.postal_code,
+                                country: address.country,
+                                phone: address.phone,
+                              })
+                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                                : 'border-border hover:border-gray-300 dark:hover:border-gray-600'
+                            }`}
+                            onClick={() => selectSavedAddress(address)}
+                          >
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <span className="font-medium">{address.full_name}</span>
+                                  {address.is_default && (
+                                    <span className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 px-2 py-1 rounded">
+                                      Default
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  <p>{address.address_line1}</p>
+                                  {address.address_line2 && <p>{address.address_line2}</p>}
+                                  <p>
+                                    {address.city}, {address.state} {address.postal_code}
+                                  </p>
+                                  <p>{address.country}</p>
+                                  <p>{address.phone}</p>
+                                </div>
+                              </div>
+                              <div className="flex gap-2 ml-4">
+                                {!address.is_default && (
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setAsDefaultAddress(address.id);
+                                    }}
+                                  >
+                                    Set Default
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  )}
+
                   <Card>
                     <CardHeader>
-                      <CardTitle>Shipping Address</CardTitle>
+                      <CardTitle>
+                        {useSavedAddress && savedAddresses.length > 0 
+                          ? 'New Address (Optional)' 
+                          : 'Shipping Address'
+                        }
+                      </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="grid md:grid-cols-2 gap-4">
@@ -381,6 +592,27 @@ const Checkout = () => {
                           required
                         />
                       </div>
+                      
+                      {/* Save Address Button */}
+                      {user && !useSavedAddress && (
+                        <div className="pt-4 border-t border-border">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={saveCurrentAddress}
+                            disabled={
+                              !shippingAddress.full_name ||
+                              !shippingAddress.address_line1 ||
+                              !shippingAddress.city ||
+                              !shippingAddress.postal_code ||
+                              !shippingAddress.country ||
+                              !shippingAddress.phone
+                            }
+                          >
+                            Save Address for Future Orders
+                          </Button>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </div>
