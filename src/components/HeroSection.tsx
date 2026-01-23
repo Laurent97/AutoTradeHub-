@@ -74,7 +74,7 @@ const HeroSection = () => {
 
           {/* Quick Categories */}
           <div className="flex flex-wrap gap-3 animate-slide-up" style={{ animationDelay: "0.3s" }}>
-            <Link to="/products?category=car">
+            <Link to="/products?category=cars">
               <Button variant="hero-outline" size="lg" className="gap-2">
                 <Car className="w-5 h-5" />
                 Browse Cars
