@@ -125,7 +125,7 @@ const fallbackProducts = [
     id: "10",
     title: "2022 Ford F-150 Truck",
     category: "vehicles",
-    category_path: { product_type: "cars", category_name: "Trucks" },
+    category_path: { product_type: "vehicles", category_name: "Trucks" },
     price: 45000,
     originalPrice: 52000,
     year: 2022,
@@ -136,6 +136,22 @@ const fallbackProducts = [
     model: "F-150",
     rating: 4.7,
     image: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=800&auto=format&fit=crop",
+  },
+  {
+    id: "11",
+    title: "2021 Honda Civic Sedan",
+    category: "cars",
+    category_path: { product_type: "cars", category_name: "Sedans" },
+    price: 22000,
+    originalPrice: 25000,
+    year: 2021,
+    mileage: 15000,
+    location: "Japan",
+    condition: "Used",
+    make: "Honda",
+    model: "Civic",
+    rating: 4.6,
+    image: "https://images.unsplash.com/photo-1559416523-140ddc3d238c?w=800&auto=format&fit=crop",
   },
 ];
 
@@ -343,17 +359,44 @@ export default function ProductsEnhanced() {
       if (result.data && result.data.length > 0) {
         // Apply filters client-side for now
         let filtered = result.data.filter((product: any) => {
-          // Filter by main category - handle both cars and vehicles for the same display
+          // Filter by main category - exact category matching
           if (categoryFilter !== "all") {
             const productType = product.category_path?.product_type;
             const productCategory = product.category;
             
-            // Map both 'cars' and 'vehicles' to the same filter
-            if (categoryFilter === "cars") {
-              if (productType !== "cars" && productCategory !== "car" && productCategory !== "vehicles") return false;
-            } else {
-              if (productType !== categoryFilter && productCategory !== categoryFilter) return false;
+            // Enhanced category mapping for exact matching
+            const categoryMap: Record<string, string[]> = {
+              "cars": ["cars", "car"], // Show products uploaded as 'cars' or 'car'
+              "vehicles": ["vehicles"], // Show products uploaded as 'vehicles'
+              "parts": ["parts", "part"], // Show products uploaded as 'parts' or 'part'
+              "accessories": ["accessories", "accessory"], // Show products uploaded as 'accessories' or 'accessory'
+              "engine": ["parts"], // Engine is a subcategory of parts
+              "transmission": ["parts"], // Transmission is a subcategory of parts
+              "suspension": ["parts"], // Suspension is a subcategory of parts
+              "brakes": ["parts"], // Brakes is a subcategory of parts
+              "electrical": ["parts"], // Electrical is a subcategory of parts
+              "interior": ["accessories"], // Interior is a subcategory of accessories
+              "exterior": ["accessories"], // Exterior is a subcategory of accessories
+              "performance": ["parts"], // Performance is a subcategory of parts
+              "tools": ["accessories"], // Tools is a subcategory of accessories
+              "maintenance": ["parts"], // Maintenance is a subcategory of parts
+            };
+            
+            const allowedCategories = categoryMap[categoryFilter] || [categoryFilter];
+            
+            // Check if product matches any of the allowed categories
+            const matchesCategory = allowedCategories.includes(productCategory) || 
+                                  allowedCategories.includes(productType);
+            
+            // For subcategories, also check the category_path
+            const matchesSubcategory = subcategoryFilter && 
+                                      product.category_path?.category_name === subcategoryFilter;
+            
+            if (subcategoryFilter) {
+              return matchesSubcategory;
             }
+            
+            return matchesCategory;
           }
           
           // Filter by subcategory
@@ -384,17 +427,44 @@ export default function ProductsEnhanced() {
       } else {
         // Fallback to demo data
         let filtered = fallbackProducts.filter((product: any) => {
-          // Filter by main category - handle both cars and vehicles for the same display
+          // Filter by main category - exact category matching
           if (categoryFilter !== "all") {
             const productType = product.category_path?.product_type;
             const productCategory = product.category;
             
-            // Map both 'cars' and 'vehicles' to the same filter
-            if (categoryFilter === "cars") {
-              if (productType !== "cars" && productCategory !== "car" && productCategory !== "vehicles") return false;
-            } else {
-              if (productType !== categoryFilter && productCategory !== categoryFilter) return false;
+            // Enhanced category mapping for exact matching
+            const categoryMap: Record<string, string[]> = {
+              "cars": ["cars", "car"], // Show products uploaded as 'cars' or 'car'
+              "vehicles": ["vehicles"], // Show products uploaded as 'vehicles'
+              "parts": ["parts", "part"], // Show products uploaded as 'parts' or 'part'
+              "accessories": ["accessories", "accessory"], // Show products uploaded as 'accessories' or 'accessory'
+              "engine": ["parts"], // Engine is a subcategory of parts
+              "transmission": ["parts"], // Transmission is a subcategory of parts
+              "suspension": ["parts"], // Suspension is a subcategory of parts
+              "brakes": ["parts"], // Brakes is a subcategory of parts
+              "electrical": ["parts"], // Electrical is a subcategory of parts
+              "interior": ["accessories"], // Interior is a subcategory of accessories
+              "exterior": ["accessories"], // Exterior is a subcategory of accessories
+              "performance": ["parts"], // Performance is a subcategory of parts
+              "tools": ["accessories"], // Tools is a subcategory of accessories
+              "maintenance": ["parts"], // Maintenance is a subcategory of parts
+            };
+            
+            const allowedCategories = categoryMap[categoryFilter] || [categoryFilter];
+            
+            // Check if product matches any of the allowed categories
+            const matchesCategory = allowedCategories.includes(productCategory) || 
+                                  allowedCategories.includes(productType);
+            
+            // For subcategories, also check the category_path
+            const matchesSubcategory = subcategoryFilter && 
+                                      product.category_path?.category_name === subcategoryFilter;
+            
+            if (subcategoryFilter) {
+              return matchesSubcategory;
             }
+            
+            return matchesCategory;
           }
           
           // Filter by subcategory
@@ -489,17 +559,44 @@ export default function ProductsEnhanced() {
       console.error('Error loading products:', error);
       // Fallback to demo data
       const filtered = fallbackProducts.filter((product: any) => {
-        // Filter by main category - handle both cars and vehicles for the same display
+        // Filter by main category - exact category matching
         if (categoryFilter !== "all") {
           const productType = product.category_path?.product_type;
           const productCategory = product.category;
           
-          // Map both 'cars' and 'vehicles' to the same filter
-          if (categoryFilter === "cars") {
-            if (productType !== "cars" && productCategory !== "car" && productCategory !== "vehicles") return false;
-          } else {
-            if (productType !== categoryFilter && productCategory !== categoryFilter) return false;
+          // Enhanced category mapping for exact matching
+          const categoryMap: Record<string, string[]> = {
+            "cars": ["cars", "car"], // Show products uploaded as 'cars' or 'car'
+            "vehicles": ["vehicles"], // Show products uploaded as 'vehicles'
+            "parts": ["parts", "part"], // Show products uploaded as 'parts' or 'part'
+            "accessories": ["accessories", "accessory"], // Show products uploaded as 'accessories' or 'accessory'
+            "engine": ["parts"], // Engine is a subcategory of parts
+            "transmission": ["parts"], // Transmission is a subcategory of parts
+            "suspension": ["parts"], // Suspension is a subcategory of parts
+            "brakes": ["parts"], // Brakes is a subcategory of parts
+            "electrical": ["parts"], // Electrical is a subcategory of parts
+            "interior": ["accessories"], // Interior is a subcategory of accessories
+            "exterior": ["accessories"], // Exterior is a subcategory of accessories
+            "performance": ["parts"], // Performance is a subcategory of parts
+            "tools": ["accessories"], // Tools is a subcategory of accessories
+            "maintenance": ["parts"], // Maintenance is a subcategory of parts
+          };
+          
+          const allowedCategories = categoryMap[categoryFilter] || [categoryFilter];
+          
+          // Check if product matches any of the allowed categories
+          const matchesCategory = allowedCategories.includes(productCategory) || 
+                                allowedCategories.includes(productType);
+          
+          // For subcategories, also check the category_path
+          const matchesSubcategory = subcategoryFilter && 
+                                    product.category_path?.category_name === subcategoryFilter;
+          
+          if (subcategoryFilter) {
+            return matchesSubcategory;
           }
+          
+          return matchesCategory;
         }
         if (subcategoryFilter && product.category_path?.category_name !== subcategoryFilter) return false;
         if (searchQuery && !product.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;

@@ -17,12 +17,20 @@ import { cn } from "@/lib/utils";
 // Enhanced category structure with icons
 const enhancedCategories = [
   {
+    id: "cars",
+    label: "Cars",
+    icon: Car,
+    description: "Sedans, coupes, hatchbacks & more",
+    product_type: "cars",
+    color: "bg-blue-500"
+  },
+  {
     id: "vehicles",
     label: "Vehicles",
     icon: Car,
-    description: "Cars, trucks, SUVs & more",
-    product_type: "cars",
-    color: "bg-blue-500"
+    description: "Trucks, SUVs, vans & more",
+    product_type: "vehicles",
+    color: "bg-green-500"
   },
   {
     id: "engine",
