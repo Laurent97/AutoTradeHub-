@@ -6,7 +6,7 @@ import { OrderStatusBadge } from '../components/OrderStatusBadge';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { ArrowLeft, Package, MapPin, CreditCard, User, Calendar, DollarSign } from 'lucide-react';
+import { ArrowLeft, Package, MapPin, CreditCard, User, Calendar, DollarSign, Truck, Clock, CheckCircle } from 'lucide-react';
 
 export default function OrderDetails() {
   const { orderId } = useParams<{ orderId: string }>();
@@ -163,38 +163,151 @@ export default function OrderDetails() {
             </h1>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Main Order Info */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Order Status Card */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    {order.order_number}
-                  </h2>
-                  <OrderStatusBadge status={order.status} />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-gray-500 dark:text-gray-400">Order Date:</span>
-                    <p className="font-medium text-gray-900 dark:text-white">
+          {/* Order Status Card */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  {order.order_number}
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Placed on {new Date(order.created_at).toLocaleDateString()} at {new Date(order.created_at).toLocaleTimeString()}
+                </p>
+              </div>
+              <div className="mt-4 md:mt-0">
+                <OrderStatusBadge status={order.status} />
+              </div>
+            </div>
+
+            {/* Order Timeline */}
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Order Status</h3>
+              <div className="space-y-4">
+                <div className="flex items-center">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    order.status === 'pending' || order.status === 'waiting_confirmation' || order.status === 'processing' || order.status === 'shipped' || order.status === 'completed'
+                      ? 'bg-green-100 dark:bg-green-900/30' 
+                      : 'bg-gray-100 dark:bg-gray-700'
+                  }`}>
+                    <CheckCircle className={`w-4 h-4 ${
+                      order.status === 'pending' || order.status === 'waiting_confirmation' || order.status === 'processing' || order.status === 'shipped' || order.status === 'completed'
+                        ? 'text-green-600 dark:text-green-400' 
+                        : 'text-gray-400'
+                    }`} />
+                  </div>
+                  <div className="ml-4">
+                    <p className="font-medium text-gray-900 dark:text-white">Order Placed</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       {new Date(order.created_at).toLocaleDateString()}
                     </p>
                   </div>
-                  <div>
-                    <span className="text-gray-500 dark:text-gray-400">Total Amount:</span>
-                    <p className="font-medium text-gray-900 dark:text-white">
-                      ${order.total_amount?.toFixed(2)}
-                    </p>
-                  </div>
                 </div>
-              </div>
 
+                {(order.status === 'waiting_confirmation' || order.status === 'processing' || order.status === 'shipped' || order.status === 'completed') && (
+                  <div className="flex items-center">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      order.status === 'waiting_confirmation' || order.status === 'processing' || order.status === 'shipped' || order.status === 'completed'
+                        ? 'bg-green-100 dark:bg-green-900/30' 
+                        : 'bg-gray-100 dark:bg-gray-700'
+                    }`}>
+                      <Clock className={`w-4 h-4 ${
+                        order.status === 'waiting_confirmation' || order.status === 'processing' || order.status === 'shipped' || order.status === 'completed'
+                          ? 'text-green-600 dark:text-green-400' 
+                          : 'text-gray-400'
+                      }`} />
+                    </div>
+                    <div className="ml-4">
+                      <p className="font-medium text-gray-900 dark:text-white">Payment Confirmed</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {order.payment_status === 'paid' ? 'Payment received' : 'Waiting for payment'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {(order.status === 'processing' || order.status === 'shipped' || order.status === 'completed') && (
+                  <div className="flex items-center">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      order.status === 'processing' || order.status === 'shipped' || order.status === 'completed'
+                        ? 'bg-green-100 dark:bg-green-900/30' 
+                        : 'bg-gray-100 dark:bg-gray-700'
+                    }`}>
+                      <Package className={`w-4 h-4 ${
+                        order.status === 'processing' || order.status === 'shipped' || order.status === 'completed'
+                          ? 'text-green-600 dark:text-green-400' 
+                          : 'text-gray-400'
+                      }`} />
+                    </div>
+                    <div className="ml-4">
+                      <p className="font-medium text-gray-900 dark:text-white">Order Processing</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Your order is being prepared for shipment
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {(order.status === 'shipped' || order.status === 'completed') && (
+                  <div className="flex items-center">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      order.status === 'shipped' || order.status === 'completed'
+                        ? 'bg-green-100 dark:bg-green-900/30' 
+                        : 'bg-gray-100 dark:bg-gray-700'
+                    }`}>
+                      <Truck className={`w-4 h-4 ${
+                        order.status === 'shipped' || order.status === 'completed'
+                          ? 'text-green-600 dark:text-green-400' 
+                          : 'text-gray-400'
+                      }`} />
+                    </div>
+                    <div className="ml-4">
+                      <p className="font-medium text-gray-900 dark:text-white">Order Shipped</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {order.tracking_number ? `Tracking: ${order.tracking_number}` : 'Waiting for tracking number'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {order.status === 'completed' && (
+                  <div className="flex items-center">
+                    <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                      <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div className="ml-4">
+                      <p className="font-medium text-gray-900 dark:text-white">Order Delivered</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Order has been successfully delivered
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {order.status === 'cancelled' && (
+                  <div className="flex items-center">
+                    <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                      <CheckCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                    </div>
+                    <div className="ml-4">
+                      <p className="font-medium text-red-600 dark:text-red-400">Order Cancelled</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {order.cancellation_reason || 'Order was cancelled'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main Order Info */}
+            <div className="lg:col-span-2 space-y-6">
               {/* Order Items */}
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  Order Items
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                  <Package className="w-5 h-5 mr-2" />
+                  Order Items ({order.order_items?.length || 0})
                 </h3>
                 <div className="space-y-4">
                   {order.order_items?.map((item: any) => (
@@ -210,6 +323,9 @@ export default function OrderDetails() {
                         <h4 className="font-medium text-gray-900 dark:text-white">
                           {item.product?.title || 'Product'}
                         </h4>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {item.product?.make && item.product?.model && `${item.product.make} ${item.product.model}`}
+                        </p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
                           Quantity: {item.quantity} × ${item.unit_price?.toFixed(2)}
                         </p>
@@ -230,7 +346,7 @@ export default function OrderDetails() {
                   <MapPin className="w-5 h-5 mr-2" />
                   Shipping Information
                 </h3>
-                {order.shipping_address && (
+                {order.shipping_address ? (
                   <div className="text-gray-700 dark:text-gray-300">
                     <p className="font-medium">{order.shipping_address.full_name}</p>
                     <p>{order.shipping_address.address_line_1}</p>
@@ -243,7 +359,24 @@ export default function OrderDetails() {
                     <p>{order.shipping_address.country}</p>
                     <p className="mt-2">Phone: {order.shipping_address.phone}</p>
                   </div>
+                ) : (
+                  <p className="text-gray-500 dark:text-gray-400">Shipping information not available</p>
                 )}
+              </div>
+
+              {/* Customer Information */}
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                  <User className="w-5 h-5 mr-2" />
+                  Customer Information
+                </h3>
+                <div className="text-gray-700 dark:text-gray-300">
+                  <p className="font-medium">{order.user?.full_name || 'Customer'}</p>
+                  <p className="text-sm">{order.user?.email}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                    Customer ID: {order.customer_id}
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -251,7 +384,8 @@ export default function OrderDetails() {
             <div className="space-y-6">
               {/* Order Summary */}
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                  <DollarSign className="w-5 h-5 mr-2" />
                   Order Summary
                 </h3>
                 <div className="space-y-3">
@@ -265,11 +399,17 @@ export default function OrderDetails() {
                     <span className="text-gray-500 dark:text-gray-400">Shipping</span>
                     <span className="text-green-600 dark:text-green-400">Free</span>
                   </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500 dark:text-gray-400">Tax</span>
+                    <span className="text-gray-900 dark:text-white">
+                      ${(order.total_amount * 0.1).toFixed(2)}
+                    </span>
+                  </div>
                   <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
                     <div className="flex justify-between">
                       <span className="font-semibold text-gray-900 dark:text-white">Total</span>
                       <span className="font-bold text-lg text-gray-900 dark:text-white">
-                        ${order.total_amount?.toFixed(2)}
+                        ${(order.total_amount * 1.1).toFixed(2)}
                       </span>
                     </div>
                   </div>
@@ -291,12 +431,47 @@ export default function OrderDetails() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500 dark:text-gray-400">Status:</span>
-                    <span className="text-gray-900 dark:text-white capitalize">
+                    <span className={`font-medium capitalize ${
+                      order.payment_status === 'paid' 
+                        ? 'text-green-600 dark:text-green-400' 
+                        : 'text-orange-600 dark:text-orange-400'
+                    }`}>
                       {order.payment_status}
                     </span>
                   </div>
+                  {order.payment_status === 'paid' && (
+                    <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                      <p className="text-sm text-green-700 dark:text-green-300">
+                        ✓ Payment successfully processed
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
+
+              {/* Tracking Information */}
+              {order.tracking_number && (
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <Truck className="w-5 h-5 mr-2" />
+                    Tracking Information
+                  </h3>
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Tracking Number:
+                    </p>
+                    <p className="font-mono text-sm font-medium text-gray-900 dark:text-white">
+                      {order.tracking_number}
+                    </p>
+                    <button
+                      onClick={() => window.open(`https://www.fedex.com/fedextrack/?trknbr=${order.tracking_number}`, '_blank')}
+                      className="mt-2 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                    >
+                      Track Package →
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Actions */}
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
