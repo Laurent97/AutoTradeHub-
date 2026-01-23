@@ -17,9 +17,13 @@ import Checkout from "./pages/Checkout";
 import Payment from "./pages/Payment";
 import OrderSuccess from "./pages/OrderSuccess";
 import OrderSuccessStore from "./pages/OrderSuccessStore";
-import Auth from "./pages/Auth";
-import Store from "./pages/Store";
+import FAQ from "./pages/FAQ";
+import PartnerFAQ from "./pages/FAQ-Partner";
+import Careers from "./pages/Careers";
+import Returns from "./pages/Returns";
 import Stores from "./pages/Stores";
+import Store from "./pages/Store";
+import Auth from "./pages/Auth";
 import Manufacturers from "./pages/Manufacturers";
 import PartnerRegister from "./pages/partner/Register";
 import PartnerPending from "./pages/partner/Pending";
@@ -52,9 +56,7 @@ import SetupProfile from "./pages/help/getting-started/SetupProfile";
 import VerifyIdentity from "./pages/help/getting-started/VerifyIdentity";
 import FirstOrderGuide from "./pages/help/getting-started/FirstOrderGuide";
 import SearchProducts from "./pages/help/buying/SearchProducts";
-import Returns from "./pages/Returns";
 import TrackOrder from "./pages/TrackOrder";
-import FAQ from "./pages/FAQ";
 
 // Payment components for dashboard integration
 import CryptoDeposit from "./components/Payment/CryptoDeposit";
@@ -125,6 +127,8 @@ const App = () => (
               <Route path="/returns" element={<Returns />} />
               <Route path="/track-order" element={<TrackOrder />} />
               <Route path="/faq" element={<FAQ />} />
+              <Route path="/faqs" element={<PartnerFAQ />} />
+              <Route path="/careers" element={<Careers />} />
               {/* Legacy routes - redirect to dashboard */}
               <Route path="/payment/crypto-deposit" element={<PartnerOnlyRoute requireApproved={true}><Navigate to="/partner/dashboard/wallet/deposit" replace /></PartnerOnlyRoute>} />
               <Route path="/payment/withdraw" element={<PartnerOnlyRoute requireApproved={true}><Navigate to="/partner/dashboard/wallet/withdraw" replace /></PartnerOnlyRoute>} />
