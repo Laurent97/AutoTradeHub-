@@ -66,6 +66,19 @@ export default function OrderDetails() {
         error = result.error;
         
         console.log('Order number lookup result:', { data, error });
+        console.log('Data type:', typeof data);
+        console.log('Error type:', typeof error);
+        console.log('Data keys:', data ? Object.keys(data) : 'null');
+        console.log('Error keys:', error ? Object.keys(error) : 'null');
+        
+        if (error) {
+          console.log('Error details:', {
+            code: error.code,
+            message: error.message,
+            details: error.details,
+            hint: error.hint
+          });
+        }
       }
       
       // Enhanced error handling
