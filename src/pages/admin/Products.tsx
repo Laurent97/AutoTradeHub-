@@ -437,6 +437,16 @@ export default function AdminProducts() {
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     >
                       <option value="car">Car</option>
+                      <option value="engine">Engine</option>
+                      <option value="transmission">Transmission</option>
+                      <option value="suspension">Suspension</option>
+                      <option value="brakes">Brakes</option>
+                      <option value="electrical">Electrical</option>
+                      <option value="interior">Interior</option>
+                      <option value="exterior">Exterior</option>
+                      <option value="performance">Performance</option>
+                      <option value="tools">Tools</option>
+                      <option value="maintenance">Maintenance</option>
                       <option value="part">Part</option>
                       <option value="accessory">Accessory</option>
                     </select>
@@ -570,6 +580,16 @@ export default function AdminProducts() {
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     >
                       <option value="car">Car</option>
+                      <option value="engine">Engine</option>
+                      <option value="transmission">Transmission</option>
+                      <option value="suspension">Suspension</option>
+                      <option value="brakes">Brakes</option>
+                      <option value="electrical">Electrical</option>
+                      <option value="interior">Interior</option>
+                      <option value="exterior">Exterior</option>
+                      <option value="performance">Performance</option>
+                      <option value="tools">Tools</option>
+                      <option value="maintenance">Maintenance</option>
                       <option value="part">Part</option>
                       <option value="accessory">Accessory</option>
                     </select>
