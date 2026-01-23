@@ -60,8 +60,15 @@ export default function PartnerDashboard() {
     
     try {
       // Load partner profile
-      const { data: partnerData } = await partnerService.getPartnerProfile(user.id);
-      setPartner(partnerData);
+      const { data: partnerData, error: partnerError } = await partnerService.getPartnerProfile(user.id);
+      
+      if (partnerError) {
+        console.warn('Partner profile not found:', partnerError);
+        // Don't throw error, just continue with null partner data
+        setPartner(null);
+      } else {
+        setPartner(partnerData);
+      }
 
       if (partnerData) {
         // Load partner analytics

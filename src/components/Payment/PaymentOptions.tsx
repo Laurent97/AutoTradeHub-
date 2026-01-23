@@ -47,11 +47,19 @@ export default function PaymentOptions({
     if (!user) return;
     
     setLoadingBalance(true);
-    const { data } = await paymentService.getWalletBalance(user.id);
-    if (data) {
-      setWalletBalance(data.available_balance || 0);
+    try {
+      const { data } = await paymentService.getWalletBalance(user.id);
+      if (data && typeof data.balance === 'number') {
+        setWalletBalance(data.balance);
+      } else {
+        setWalletBalance(0);
+      }
+    } catch (error) {
+      console.error('Error loading wallet balance:', error);
+      setWalletBalance(0);
+    } finally {
+      setLoadingBalance(false);
     }
-    setLoadingBalance(false);
   };
 
   const handleWalletPayment = async () => {

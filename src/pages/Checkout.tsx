@@ -163,11 +163,11 @@ const Checkout = () => {
                 {!user ? (
                   <Card>
                     <CardContent className="pt-6">
-                      <div className="bg-yellow-50 p-6 rounded-lg border border-yellow-200">
-                        <h3 className="text-lg font-semibold text-yellow-800 mb-2">
+                      <div className="bg-yellow-50 dark:bg-yellow-900/20 p-6 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                        <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-300 mb-2">
                           Login Required
                         </h3>
-                        <p className="text-yellow-700 mb-4">
+                        <p className="text-yellow-700 dark:text-yellow-400 mb-4">
                           Please login or create an account to continue with payment.
                         </p>
                         <Button

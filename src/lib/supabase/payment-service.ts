@@ -49,7 +49,11 @@ export const paymentService = {
     if (error && error.code === 'PGRST116') {
       const { data: newBalance, error: insertError } = await supabase
         .from('wallet_balances')
-        .insert({ user_id: userId })
+        .insert({ 
+          user_id: userId,
+          balance: 0,
+          currency: 'USD'
+        })
         .select()
         .single();
 

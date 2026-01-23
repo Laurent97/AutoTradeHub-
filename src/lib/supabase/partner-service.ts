@@ -377,16 +377,16 @@ export const partnerService = {
         .single();
 
       if (error) {
-        console.error('❌ Error fetching partner profile:', error);
-        
-        // Handle case where profile doesn't exist
+        // Handle case where profile doesn't exist - this is expected for non-partners
         if (error.code === 'PGRST116') {
+          console.log('ℹ️ Partner profile not found for user:', userId);
           return { 
             data: null, 
             error: 'Partner profile not found. Please complete registration.' 
           };
         }
         
+        console.error('❌ Error fetching partner profile:', error);
         throw error;
       }
 
@@ -519,16 +519,16 @@ export const partnerService = {
         .single();
 
       if (error) {
-        console.error('❌ Error fetching partner settings:', error);
-        
-        // Handle case where profile doesn't exist
+        // Handle case where profile doesn't exist - this is expected for non-partners
         if (error.code === 'PGRST116') {
+          console.log('ℹ️ Partner settings not found for user:', userId);
           return { 
             data: null, 
             error: 'Partner profile not found. Please complete registration.' 
           };
         }
         
+        console.error('❌ Error fetching partner settings:', error);
         throw error;
       }
 
@@ -544,7 +544,7 @@ export const partnerService = {
   },
 
   /**
-   * Update partner settings
+   * Update partner settings (or create if doesn't exist)
    */
   async updatePartnerSettings(userId: string, settings: {
     store_name?: string;
@@ -560,9 +560,11 @@ export const partnerService = {
       
       const { data, error } = await supabase
         .from('partner_profiles')
-        .update({
+        .upsert({
+          user_id: userId,
           ...settings,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
+          created_at: new Date().toISOString() // Only used on insert
         })
         .eq('user_id', userId)
         .select()

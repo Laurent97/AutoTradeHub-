@@ -30,7 +30,13 @@ export default function DashboardSettings() {
     setError(null);
     try {
       const { data, error } = await partnerService.getPartnerSettings(userProfile.id);
-      if (error) throw error;
+      if (error) {
+        // If partner profile doesn't exist, just show empty form (don't show error)
+        if (!error.includes('Partner profile not found')) {
+          throw error;
+        }
+        // For missing profile, just continue with empty settings
+      }
       
       if (data) {
         setSettings({
@@ -43,6 +49,7 @@ export default function DashboardSettings() {
           taxId: data.tax_id || '',
         });
       }
+      // If no data, keep default empty values
     } catch (err) {
       console.error('Failed to load settings:', err);
       setError(err instanceof Error ? err.message : 'Failed to load settings');
@@ -105,6 +112,13 @@ export default function DashboardSettings() {
       {error && (
         <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700/50 rounded-lg text-red-700 dark:text-red-300">
           {error}
+        </div>
+      )}
+
+      {!error && !settings.storeName && !loading && (
+        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/50 rounded-lg text-blue-700 dark:text-blue-300">
+          <p className="font-medium mb-1">👋 Welcome to your store settings!</p>
+          <p className="text-sm">Fill in your store information below to get started. This will create your partner profile.</p>
         </div>
       )}
 
@@ -225,7 +239,7 @@ export default function DashboardSettings() {
             disabled={saving}
             className="bg-amber-600 hover:bg-amber-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg font-medium"
           >
-            {saving ? 'Saving...' : 'Save Settings'}
+            {saving ? 'Saving...' : (settings.storeName ? 'Save Settings' : 'Create Partner Profile')}
           </button>
         </div>
       </div>
