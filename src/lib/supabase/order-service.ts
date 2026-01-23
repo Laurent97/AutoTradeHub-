@@ -128,6 +128,7 @@ export const orderService = {
       .select(
         `
         *,
+        user:users(id, email, full_name),
         order_items (
           *,
           product:products (*)
