@@ -68,6 +68,7 @@ export default function OrderDetails() {
       }
       
       if (!data) {
+        console.log('No order found with identifier:', orderId);
         throw new Error('Order not found');
       }
       

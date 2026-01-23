@@ -92,7 +92,7 @@ export const orderService = {
       `
       )
       .eq('id', orderId)
-      .single();
+      .maybeSingle();
 
     return { data, error };
   },
@@ -114,7 +114,8 @@ export const orderService = {
       `
       )
       .eq('order_number', orderNumber)
-      .single();
+      .limit(1)
+      .maybeSingle();
 
     return { data, error };
   },
