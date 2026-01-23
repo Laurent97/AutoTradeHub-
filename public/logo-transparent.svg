@@ -1,0 +1,29 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Transparent background - no background element -->
+  
+  <!-- Outer gear ring -->
+  <circle cx="100" cy="100" r="75" fill="none" stroke="#2D6FF7" stroke-width="10"/>
+  
+  <!-- Inner gear circle -->
+  <circle cx="100" cy="100" r="50" fill="#2D6FF7"/>
+  
+  <!-- Gear teeth (8 teeth) -->
+  <rect x="85" y="15" width="30" height="35" rx="15" fill="#2D6FF7"/>
+  <rect x="85" y="150" width="30" height="35" rx="15" fill="#2D6FF7"/>
+  <rect x="15" y="85" width="35" height="30" rx="15" fill="#2D6FF7"/>
+  <rect x="150" y="85" width="35" height="30" rx="15" fill="#2D6FF7"/>
+  <rect x="40" y="40" width="30" height="30" rx="15" fill="#2D6FF7"/>
+  <rect x="130" y="40" width="30" height="30" rx="15" fill="#2D6FF7"/>
+  <rect x="40" y="130" width="30" height="30" rx="15" fill="#2D6FF7"/>
+  <rect x="130" y="130" width="30" height="30" rx="15" fill="#2D6FF7"/>
+  
+  <!-- Car body -->
+  <rect x="70" y="85" width="60" height="25" rx="12" fill="white"/>
+  
+  <!-- Car wheels -->
+  <circle cx="85" cy="78" r="10" fill="white"/>
+  <circle cx="115" cy="78" r="10" fill="white"/>
+  
+  <!-- Car roof -->
+  <rect x="80" y="70" width="40" height="15" rx="7" fill="white"/>
+</svg>

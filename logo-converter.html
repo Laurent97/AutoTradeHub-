@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoTradeHub Logo PNG Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .logo-preview {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .logo-preview img {
+            max-width: 200px;
+            height: auto;
+        }
+        button {
+            background: #2D6FF7;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background: #1a4dc2;
+        }
+        .instructions {
+            text-align: left;
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AutoTradeHub Logo PNG Converter</h1>
+        
+        <div class="logo-preview">
+            <h3>Current SVG Logo (Transparent Background):</h3>
+            <img src="/logo-transparent.svg" alt="AutoTradeHub Logo" />
+        </div>
+
+        <button onclick="downloadPNG()">Download as PNG (200x200)</button>
+        <button onclick="downloadLargePNG()">Download as PNG (500x500)</button>
+        <button onclick="downloadSmallPNG()">Download as PNG (100x100)</button>
+
+        <div class="instructions">
+            <h3>Instructions:</h3>
+            <ol>
+                <li>Click any button above to download the logo as PNG</li>
+                <li>The PNG will have a transparent background</li>
+                <li>No text - only the gear + car symbol</li>
+                <li>Choose the size that best fits your needs</li>
+                <li>You can also right-click the logo above and save as PNG directly</li>
+            </ol>
+        </div>
+
+        <div class="instructions">
+            <h3>Alternative Methods:</h3>
+            <ul>
+                <li><strong>Online Converters:</strong> Use online SVG to PNG converters like svgtopng.com</li>
+                <li><strong>Design Software:</strong> Open the SVG in Adobe Illustrator, Figma, or Inkscape and export as PNG</li>
+                <li><strong>Command Line:</strong> Use tools like ImageMagick or librsvg if you have them installed</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script>
+        function downloadPNG() {
+            downloadLogo(200, 200, 'AutoTradeHub-Logo-200x200.png');
+        }
+
+        function downloadLargePNG() {
+            downloadLogo(500, 500, 'AutoTradeHub-Logo-500x500.png');
+        }
+
+        function downloadSmallPNG() {
+            downloadLogo(100, 100, 'AutoTradeHub-Logo-100x100.png');
+        }
+
+        function downloadLogo(width, height, filename) {
+            // Create a temporary container with the logo
+            const tempDiv = document.createElement('div');
+            tempDiv.style.position = 'absolute';
+            tempDiv.style.left = '-9999px';
+            tempDiv.style.width = width + 'px';
+            tempDiv.style.height = height + 'px';
+            tempDiv.style.display = 'flex';
+            tempDiv.style.alignItems = 'center';
+            tempDiv.style.justifyContent = 'center';
+            tempDiv.style.background = 'transparent';
+            
+            const img = document.createElement('img');
+            img.src = '/logo-transparent.svg';
+            img.style.width = '100%';
+            img.style.height = '100%';
+            img.style.objectFit = 'contain';
+            
+            tempDiv.appendChild(img);
+            document.body.appendChild(tempDiv);
+
+            html2canvas(tempDiv, {
+                backgroundColor: null,
+                scale: 2,
+                width: width,
+                height: height,
+                useCORS: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                document.body.removeChild(tempDiv);
+                
+                // Show success message
+                const successMsg = document.createElement('div');
+                successMsg.textContent = '✓ Logo downloaded successfully!';
+                successMsg.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #28a745;
+                    color: white;
+                    padding: 10px 20px;
+                    border-radius: 6px;
+                    z-index: 9999;
+                `;
+                document.body.appendChild(successMsg);
+                
+                setTimeout(() => {
+                    document.body.removeChild(successMsg);
+                }, 3000);
+            }).catch(error => {
+                console.error('Error generating PNG:', error);
+                alert('Error generating PNG. Please try right-clicking the logo and saving as PNG manually.');
+                document.body.removeChild(tempDiv);
+            });
+        }
+    </script>
+</body>
+</html>

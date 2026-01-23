@@ -35,6 +35,11 @@ const HeroSection = () => {
       {/* Content */}
       <div className="relative container-wide py-32">
         <div className="max-w-3xl">
+          {/* Logo */}
+          <div className="flex justify-center mb-8 animate-fade-in">
+            <img src="/logo-transparent.svg" alt="AutoTradeHub" className="w-24 h-24 md:w-32 md:h-32" />
+          </div>
+
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/20 border border-accent/30 text-accent mb-8 animate-fade-in">
             <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
