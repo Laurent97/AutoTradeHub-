@@ -54,9 +54,11 @@ END;
 $$ language 'plpgsql';
 
 -- Create triggers for updated_at
+DROP TRIGGER IF EXISTS update_orders_updated_at ON orders;
 CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON orders
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_order_items_updated_at ON order_items;
 CREATE TRIGGER update_order_items_updated_at BEFORE UPDATE ON order_items
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -66,27 +68,33 @@ ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for orders
 -- Users can view their own orders
+DROP POLICY IF EXISTS "Users can view own orders" ON orders;
 CREATE POLICY "Users can view own orders" ON orders
     FOR SELECT USING (auth.uid() = customer_id);
 
 -- Partners can view orders where they are the partner
+DROP POLICY IF EXISTS "Partners can view assigned orders" ON orders;
 CREATE POLICY "Partners can view assigned orders" ON orders
     FOR SELECT USING (auth.uid() = partner_id);
 
 -- Users can insert their own orders
+DROP POLICY IF EXISTS "Users can insert own orders" ON orders;
 CREATE POLICY "Users can insert own orders" ON orders
     FOR INSERT WITH CHECK (auth.uid() = customer_id);
 
 -- Users can update their own orders (limited fields)
+DROP POLICY IF EXISTS "Users can update own orders" ON orders;
 CREATE POLICY "Users can update own orders" ON orders
     FOR UPDATE USING (auth.uid() = customer_id);
 
 -- Partners can update orders assigned to them
+DROP POLICY IF EXISTS "Partners can update assigned orders" ON orders;
 CREATE POLICY "Partners can update assigned orders" ON orders
     FOR UPDATE USING (auth.uid() = partner_id);
 
 -- RLS Policies for order_items
 -- Users can view items from their own orders
+DROP POLICY IF EXISTS "Users can view own order items" ON order_items;
 CREATE POLICY "Users can view own order items" ON order_items
     FOR SELECT USING (
         EXISTS (
@@ -97,6 +105,7 @@ CREATE POLICY "Users can view own order items" ON order_items
     );
 
 -- Partners can view items from orders assigned to them
+DROP POLICY IF EXISTS "Partners can view assigned order items" ON order_items;
 CREATE POLICY "Partners can view assigned order items" ON order_items
     FOR SELECT USING (
         EXISTS (
@@ -107,6 +116,7 @@ CREATE POLICY "Partners can view assigned order items" ON order_items
     );
 
 -- Users can insert items for their own orders
+DROP POLICY IF EXISTS "Users can insert own order items" ON order_items;
 CREATE POLICY "Users can insert own order items" ON order_items
     FOR INSERT WITH CHECK (
         EXISTS (
