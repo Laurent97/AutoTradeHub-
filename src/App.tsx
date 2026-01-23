@@ -17,6 +17,7 @@ import Checkout from "./pages/Checkout";
 import Payment from "./pages/Payment";
 import OrderSuccess from "./pages/OrderSuccess";
 import OrderSuccessStore from "./pages/OrderSuccessStore";
+import OrderDetails from "./pages/OrderDetails";
 import FAQ from "./pages/FAQ";
 import PartnerFAQ from "./pages/FAQ-Partner";
 import Careers from "./pages/Careers";
@@ -119,6 +120,7 @@ const App = () => (
               <Route path="/shipping" element={<Shipping />} />
               <Route path="/track" element={<TrackOrder />} />
               <Route path="/track-order" element={<TrackOrder />} />
+              <Route path="/orders/:orderId" element={<OrderDetails />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/help" element={<Help />} />
