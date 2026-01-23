@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Search, ShoppingCart, User, Menu, X, ChevronDown, Heart } from "lucide-react";
+import { Search, ShoppingCart, User, Menu, X, ChevronDown, Heart, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { useState, useEffect } from "react";
@@ -78,6 +78,13 @@ const Navbar = () => {
                 <Heart className="w-5 h-5" />
               </Button>
             </Link>
+            {user && (
+              <Link to="/my-orders">
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground" title="My Orders">
+                  <Package className="w-5 h-5" />
+                </Button>
+              </Link>
+            )}
             <ThemeSwitcher />
             {user ? (
               <div className="flex items-center gap-2">
@@ -143,6 +150,14 @@ const Navbar = () => {
                     Liked
                   </Button>
                 </Link>
+                {user && (
+                  <Link to="/my-orders" className="flex-1">
+                    <Button variant="outline" className="w-full gap-2">
+                      <Package className="w-4 h-4" />
+                      Orders
+                    </Button>
+                  </Link>
+                )}
                 {user ? (
                   <>
                     <Link to={dashboardUrl} className="flex-1">
