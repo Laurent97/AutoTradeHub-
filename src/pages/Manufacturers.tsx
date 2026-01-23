@@ -76,9 +76,6 @@ const ShopCard = ({ shop }: { shop: PartnerShop }) => {
     return num.toString();
   };
 
-  const productCount = 0; // Placeholder since we're not using partner_products yet
-  const avgProductPrice = 0; // Placeholder since we're not using partner_products yet
-
   return (
     <Link to={`/store/${shop.store_slug}`} className="group block">
       <Card className="overflow-hidden border border-border hover:border-accent transition-all duration-300 hover:shadow-lg">
@@ -149,24 +146,6 @@ const ShopCard = ({ shop }: { shop: PartnerShop }) => {
               </span>
             </div>
           )}
-
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
-            <div className="text-center p-2 sm:p-2 bg-muted/50 rounded-lg">
-              <div className="flex items-center justify-center gap-1 mb-1">
-                <Package className="w-3 h-3 sm:w-4 sm:h-4 text-accent" />
-                <span className="text-xs text-muted-foreground">Products</span>
-              </div>
-              <div className="font-semibold text-sm sm:text-base text-foreground">{productCount}</div>
-            </div>
-            <div className="text-center p-2 sm:p-2 bg-muted/50 rounded-lg">
-              <div className="flex items-center justify-center gap-1 mb-1">
-                <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
-                <span className="text-xs text-muted-foreground">Orders</span>
-              </div>
-              <div className="font-semibold text-sm sm:text-base text-foreground">{formatNumber(shop.total_orders)}</div>
-            </div>
-          </div>
 
           {/* Rating */}
           {shop.rating > 0 && (
