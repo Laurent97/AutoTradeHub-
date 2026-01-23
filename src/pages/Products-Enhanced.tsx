@@ -124,7 +124,7 @@ const fallbackProducts = [
   {
     id: "10",
     title: "2022 Ford F-150 Truck",
-    category: "vehicles",
+    category: "vehicle",
     category_path: { product_type: "vehicles", category_name: "Trucks" },
     price: 45000,
     originalPrice: 52000,
@@ -367,7 +367,7 @@ export default function ProductsEnhanced() {
             // Enhanced category mapping for exact matching
             const categoryMap: Record<string, string[]> = {
               "cars": ["cars", "car"], // Show products uploaded as 'cars' or 'car'
-              "vehicles": ["vehicles"], // Show products uploaded as 'vehicles'
+              "vehicles": ["vehicles", "vehicle"], // Show products uploaded as 'vehicles' or 'vehicle'
               "parts": ["parts", "part"], // Show products uploaded as 'parts' or 'part'
               "accessories": ["accessories", "accessory"], // Show products uploaded as 'accessories' or 'accessory'
               "engine": ["parts"], // Engine is a subcategory of parts
@@ -435,7 +435,7 @@ export default function ProductsEnhanced() {
             // Enhanced category mapping for exact matching
             const categoryMap: Record<string, string[]> = {
               "cars": ["cars", "car"], // Show products uploaded as 'cars' or 'car'
-              "vehicles": ["vehicles"], // Show products uploaded as 'vehicles'
+              "vehicles": ["vehicles", "vehicle"], // Show products uploaded as 'vehicles' or 'vehicle'
               "parts": ["parts", "part"], // Show products uploaded as 'parts' or 'part'
               "accessories": ["accessories", "accessory"], // Show products uploaded as 'accessories' or 'accessory'
               "engine": ["parts"], // Engine is a subcategory of parts
