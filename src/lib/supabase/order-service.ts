@@ -83,7 +83,7 @@ export const orderService = {
       .from('orders')
       .select(`
         *,
-        customer:users!orders_customer_id_fkey(id, email, full_name),
+        customer:users(id, email, full_name),
         order_items (
           *,
           product:products (*)
@@ -103,7 +103,7 @@ export const orderService = {
       .from('orders')
       .select(`
         *,
-        customer:users!orders_customer_id_fkey(id, email, full_name),
+        customer:users(id, email, full_name),
         order_items (
           *,
           product:products (*)
@@ -124,7 +124,7 @@ export const orderService = {
       .from('orders')
       .select(`
         *,
-        customer:users!orders_customer_id_fkey(id, email, full_name),
+        customer:users(id, email, full_name),
         order_items (
           *,
           product:products (*)
@@ -145,7 +145,7 @@ export const orderService = {
       .from('orders')
       .select(`
         *,
-        customer:users!orders_customer_id_fkey(id, email, full_name),
+        customer:users(id, email, full_name),
         order_items (
           *,
           product:products (*)
