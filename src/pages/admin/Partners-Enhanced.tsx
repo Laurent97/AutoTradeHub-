@@ -59,20 +59,38 @@ export default function AdminPartnersEnhanced() {
     setLoading(true);
     
     try {
-      const { data, error } = await supabase
+      // First, get all partner profiles
+      const { data: partnersData, error: partnersError } = await supabase
         .from('partner_profiles')
-        .select(`
-          *,
-          users (
-            email,
-            full_name
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (partnersError) throw partnersError;
+
+      // Then, get user information for partners that have user_id
+      const userIds = partnersData?.filter(p => p.user_id).map(p => p.user_id) || [];
+      let usersData: any[] = [];
       
-      setPartners(data || []);
+      if (userIds.length > 0) {
+        const { data: users, error: usersError } = await supabase
+          .from('users')
+          .select('id, email, full_name')
+          .in('id', userIds);
+
+        if (usersError) throw usersError;
+        usersData = users || [];
+      }
+
+      // Combine the data
+      const combinedData = partnersData?.map(partner => {
+        const user = usersData.find(u => u.id === partner.user_id);
+        return {
+          ...partner,
+          users: user || { email: null, full_name: null }
+        };
+      }) || [];
+
+      setPartners(combinedData);
     } catch (error) {
       console.error('Error loading partners:', error);
     } finally {
@@ -426,6 +444,7 @@ export default function AdminPartnersEnhanced() {
                                 </button>
                               </div>
                             </td>
+                          </tr>
                         ))}
                       </tbody>
                     </table>
