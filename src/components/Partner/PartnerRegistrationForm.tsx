@@ -466,7 +466,6 @@ const PartnerRegistrationForm: React.FC = () => {
             invitation_code_used: formData.invitationCode,
             
             // Status
-            status: 'pending_review',
             is_active: false,
             partner_status: 'pending',
             
