@@ -130,7 +130,7 @@ export const CryptoPaymentForm: React.FC<CryptoPaymentFormProps> = ({
     }
   };
 
-  const renderSelection = () => (
+  return (
     <div className="crypto-payment-form space-y-6">
       <div className="text-center mb-6">
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
@@ -149,7 +149,7 @@ export const CryptoPaymentForm: React.FC<CryptoPaymentFormProps> = ({
             {cryptoOptions.map((crypto) => (
               <button
                 key={crypto.symbol}
-                onClick={() => setSelectedCrypto(crypto)}
+                onClick={() => handleCryptoSelect(crypto)}
                 className={`p-4 border rounded-lg text-left transition-colors ${
                   selectedCrypto?.symbol === crypto.symbol
                     ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400'
@@ -179,121 +179,177 @@ export const CryptoPaymentForm: React.FC<CryptoPaymentFormProps> = ({
               </button>
             ))}
           </div>
-
-          <Button
-            value={transactionId}
-            onChange={(e) => setTransactionId(e.target.value)}
-            placeholder="Enter the transaction hash from your wallet"
-            className="font-mono"
-          />
-          
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              By confirming, you verify that you have sent the cryptocurrency. 
-              An admin will verify the transaction on the blockchain and process your order within 1-24 hours.
-            </AlertDescription>
-          </Alert>
         </div>
+      )}
 
-        <div className="flex gap-3">
-          <Button 
-            onClick={() => setStep('payment')}
-            variant="outline"
-            className="flex-1"
-          >
-            Back
-          </Button>
-          <Button 
-            onClick={handleTransactionSubmit}
-            disabled={isSubmitting}
-            className="flex-1"
-          >
-            {isSubmitting ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Submitting...
+      {step === 'payment' && selectedCrypto && (
+        <div className="space-y-6">
+          <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+            <h4 className="font-semibold text-gray-900 dark:text-white mb-4">
+              Send {selectedCrypto.name} Payment
+            </h4>
+            
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {selectedCrypto.name} Address:
+                </Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <Input
+                    value={selectedCrypto.address}
+                    readOnly
+                    className="font-mono bg-white dark:bg-gray-900 dark:border-gray-600"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCopyAddress}
+                    className="dark:border-gray-600 dark:text-gray-300"
+                  >
+                    {copiedAddress ? (
+                      <>
+                        <CheckCircle className="w-4 h-4 mr-1" />
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4 mr-1" />
+                        Copy
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
-            ) : (
-              'Submit Transaction ID'
-            )}
-          </Button>
-        </div>
 
-        {error && (
-          <Alert className="border-red-200 bg-red-50">
-            <AlertCircle className="h-4 w-4 text-red-600" />
-            <AlertDescription className="text-red-800">
-              {error}
-            </AlertDescription>
-          </Alert>
-        )}
-      </div>
-    );
-  };
+              <div>
+                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Amount to Send:
+                </Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <Input
+                    value={amount.toFixed(2)}
+                    readOnly
+                    className="font-mono bg-white dark:bg-gray-900 dark:border-gray-600"
+                  />
+                  <span className="text-gray-600 dark:text-gray-400">USD</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCopyAmount}
+                    className="dark:border-gray-600 dark:text-gray-300"
+                  >
+                    {copiedAmount ? (
+                      <>
+                        <CheckCircle className="w-4 h-4 mr-1" />
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4 mr-1" />
+                        Copy
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
 
-  const renderSubmitted = () => (
-    <div className="crypto-submitted space-y-4">
-      <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-        <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-3" />
-        <h3 className="text-lg font-semibold text-green-900 mb-2">Transaction Submitted</h3>
-        
-        <div className="space-y-2 text-sm text-green-800">
-          <p>Your crypto payment has been recorded successfully.</p>
-          <p>Transaction ID: <code className="bg-white px-1 rounded">{transactionId}</code></p>
-          <p>An admin will verify the transaction on blockchain within 24 hours.</p>
-        </div>
-
-        <div className="mt-4 p-3 bg-white rounded border border-green-200">
-          <div className="text-sm space-y-1">
-            <div className="flex justify-between">
-              <span>Status:</span>
-              <span className="font-semibold text-yellow-600">Awaiting Admin Verification</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Order Status:</span>
-              <span className="font-semibold text-yellow-600">Pending Confirmation</span>
+              <div>
+                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Reference:
+                </Label>
+                <div className="font-mono text-sm bg-white dark:bg-gray-900 p-2 rounded border border-gray-300 dark:border-gray-600 mt-1">
+                  Order #{orderId}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h4 className="font-semibold text-blue-900 mb-2">What happens next?</h4>
-        <ul className="text-sm text-blue-800 space-y-1">
-          <li>• Admin will verify your transaction on the blockchain</li>
-          <li>• Transaction amount and confirmation will be checked</li>
-          <li>• You'll receive a confirmation email once verified</li>
-          <li>• Your order will be processed immediately after verification</li>
-        </ul>
-      </div>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="transactionId" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Transaction Hash/ID
+              </Label>
+              <Input
+                id="transactionId"
+                value={transactionId}
+                onChange={(e) => setTransactionId(e.target.value)}
+                placeholder="Enter transaction hash after sending"
+                className="dark:bg-gray-800 dark:border-gray-600"
+              />
+            </div>
 
-      {selectedCrypto && (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <ExternalLink className="h-4 w-4" />
-            <span>
-              You can track your transaction on any {selectedCrypto.name} block explorer using the TX ID
-            </span>
+            {error && (
+              <Alert className="border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800/50">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription className="text-red-800 dark:text-red-200">
+                  {error}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setStep('selection')}
+                className="dark:border-gray-600 dark:text-gray-300"
+              >
+                Back
+              </Button>
+              <Button
+                onClick={handleTransactionSubmit}
+                disabled={isSubmitting}
+                className="flex-1"
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Submitting...
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Bitcoin className="w-4 h-4" />
+                    I've Sent the Payment
+                  </div>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       )}
-    </div>
-  );
 
-  return (
-    <div className="crypto-payment-form">
-      <div className="mb-4">
-        <div className="flex items-center gap-2 mb-2">
-          <Bitcoin className="h-5 w-5 text-orange-600" />
-          <h3 className="text-lg font-semibold">Pay with Cryptocurrency</h3>
+      {step === 'confirmation' && (
+        <div className="text-center py-8">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            Confirming Payment
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400">
+            Please wait while we verify your cryptocurrency transaction...
+          </p>
         </div>
-      </div>
+      )}
 
-      {step === 'selection' && renderSelection()}
-      {step === 'payment' && renderPayment()}
-      {step === 'confirmation' && renderConfirmation()}
-      {step === 'submitted' && renderSubmitted()}
+      {step === 'submitted' && (
+        <div className="text-center py-8">
+          <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            Payment Submitted Successfully
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            Your cryptocurrency payment has been submitted and is awaiting confirmation.
+          </p>
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800/50 rounded-lg p-4">
+            <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-200">
+              <Clock className="w-4 h-4" />
+              <span className="text-sm">
+                <strong>Transaction ID:</strong> {transactionId}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
