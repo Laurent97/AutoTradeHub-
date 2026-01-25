@@ -7,12 +7,17 @@ import { UserType } from '@/lib/types/database';
  */
 
 export const useUserTypeDetection = () => {
-  const { user, userProfile } = useAuth();
+  const { user, userProfile, loading: authLoading } = useAuth();
 
   /**
    * Get the current user's type with enhanced logging
    */
   const getUserType = (): UserType => {
+    if (authLoading) {
+      console.log('🔍 UserTypeDetection: Auth still loading, defaulting to customer');
+      return 'customer'; // Default fallback while loading
+    }
+
     if (!user) {
       console.log('🔍 UserTypeDetection: No user logged in');
       return 'customer'; // Default fallback
@@ -21,7 +26,9 @@ export const useUserTypeDetection = () => {
     if (!userProfile) {
       console.log('🔍 UserTypeDetection: User logged in but no profile data, defaulting to customer', {
         userId: user.id,
-        email: user.email
+        email: user.email,
+        userProfile: userProfile,
+        authLoading: authLoading
       });
       return 'customer'; // Default fallback
     }

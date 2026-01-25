@@ -36,12 +36,13 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
   onPaymentSuccess,
   onPaymentError
 }) => {
-  const { user } = useAuth();
-  const { availableMethods, isLoading, canUseMethod, paymentConfigs } = usePayment();
+  const { user, loading: authLoading } = useAuth();
+  const { availableMethods, isLoading: paymentLoading, canUseMethod, paymentConfigs } = usePayment();
   const { getUserTypeInfo, logPaymentMethodAccess } = useUserTypeDetection();
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
 
   const userTypeInfo = getUserTypeInfo();
+  const isLoading = authLoading || paymentLoading;
 
   const getPaymentMethodInfo = (method: PaymentMethod): PaymentMethodInfo => {
     const canUse = canUseMethod(method);
@@ -159,7 +160,9 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
       <div className="payment-method-selector">
         <div className="flex items-center justify-center py-8">
           <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2" />
-          <span>Loading payment methods...</span>
+          <span>
+            {authLoading ? 'Loading user profile...' : 'Loading payment methods...'}
+          </span>
         </div>
       </div>
     );
