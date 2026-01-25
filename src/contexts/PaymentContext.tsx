@@ -116,6 +116,16 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({ children }) =>
 
       if (!data || data.length === 0) {
         console.log('🔍 PaymentContext: No payment configs found in database');
+        console.log('🔍 PaymentContext: Trying to list all tables to verify connection...');
+        
+        // Try to list tables to verify connection
+        const { data: tables, error: tablesError } = await supabase
+          .from('information_schema.tables')
+          .select('table_name')
+          .eq('table_schema', 'public')
+          .like('table_name', '%payment%');
+        
+        console.log('🔍 PaymentContext: Payment-related tables found:', { tables, tablesError });
         return;
       }
 
