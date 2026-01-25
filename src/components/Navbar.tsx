@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Search, ShoppingCart, User, Menu, X, ChevronDown, Heart, Package } from "lucide-react";
+import { Search, ShoppingCart, User, Menu, X, ChevronDown, Heart, Package, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { useState, useEffect } from "react";
@@ -85,6 +85,12 @@ const Navbar = () => {
                 )}
               </Button>
             </Link>
+            <Link to="/notifications">
+              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground relative">
+                <Bell className="w-5 h-5" />
+                <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-red-500"></span>
+              </Button>
+            </Link>
             <Link to="/liked-items">
               <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
                 <Heart className="w-5 h-5" />
@@ -167,6 +173,13 @@ const Navbar = () => {
                         {getItemCount()}
                       </span>
                     )}
+                  </Button>
+                </Link>
+                <Link to="/notifications" className="flex-1">
+                  <Button variant="outline" className="w-full gap-2 relative">
+                    <Bell className="w-4 h-4" />
+                    Notifications
+                    <span className="absolute top-0 right-2 w-2 h-2 rounded-full bg-red-500"></span>
                   </Button>
                 </Link>
                 <Link to="/liked-items" className="flex-1">

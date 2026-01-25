@@ -29,6 +29,7 @@ import Stores from "./pages/Stores";
 import Store from "./pages/Store";
 import Auth from "./pages/Auth";
 import Manufacturers from "./pages/Manufacturers";
+import Notifications from "./pages/Notifications";
 import AppLayout from "./components/Layout/AppLayout";
 import PartnerPending from "./pages/partner/Pending";
 import PartnerRegisterRedirect from "./pages/PartnerRegisterRedirect";
@@ -97,6 +98,7 @@ const App = () => (
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/checkout/payment" element={<Payment />} />
               <Route path="/liked-items" element={<LikedItems />} />
+              <Route path="/notifications" element={<Notifications />} />
               <Route path="/order-success" element={<OrderSuccess />} />
               <Route path="/order-success/:orderId" element={<OrderSuccessStore />} />
               <Route path="/stores" element={<Stores />} />
