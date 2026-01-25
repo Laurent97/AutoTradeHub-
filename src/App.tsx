@@ -9,6 +9,7 @@ import { CartProvider } from "./contexts/CartContext";
 import { PaymentProvider } from "./contexts/PaymentContext";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import WhatsAppFloating from "./components/CustomerService/WhatsAppFloating";
+import { injectSpeedInsights } from "@vercel/speed-insights";
 import { AdminOnlyRoute, PartnerOnlyRoute } from "./components/RoleBasedRoute";
 import Index from "./pages/Index";
 import Products from "./pages/Products-Enhanced";
@@ -68,6 +69,9 @@ import WithdrawalForm from "./components/Payment/WithdrawalForm";
 import PaymentVerification from "./components/Admin/PaymentVerification";
 
 const queryClient = new QueryClient();
+
+// Initialize SpeedInsights
+injectSpeedInsights();
 
 const App = () => (
   <ErrorBoundary>
