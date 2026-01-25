@@ -191,6 +191,18 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({ children }) =>
     }
   }, [availableMethods, isLoading, user, paymentConfigs]);
 
+  // Debug: Log payment configs when loaded
+  useEffect(() => {
+    if (!isLoading && Object.keys(paymentConfigs).length > 0) {
+      console.log('🔍 PaymentContext: Payment configs loaded', {
+        configs: paymentConfigs,
+        availableMethods,
+        userType: getUserType(),
+        userEmail: user?.email
+      });
+    }
+  }, [paymentConfigs, isLoading, user]);
+
   // Record Stripe payment attempt (for security monitoring)
   const recordStripeAttempt = async (data: StripeAttemptData): Promise<void> => {
     try {

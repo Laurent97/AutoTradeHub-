@@ -37,7 +37,7 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
   onPaymentError
 }) => {
   const { user } = useAuth();
-  const { availableMethods, isLoading, canUseMethod } = usePayment();
+  const { availableMethods, isLoading, canUseMethod, paymentConfigs } = usePayment();
   const { getUserTypeInfo, logPaymentMethodAccess } = useUserTypeDetection();
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
 
@@ -167,6 +167,18 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 
   return (
     <div className="payment-method-selector space-y-6">
+      {/* Debug Information */}
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+        <h4 className="font-semibold text-yellow-800 mb-2">🔍 Debug Information</h4>
+        <div className="text-sm space-y-1">
+          <div><strong>User Logged In:</strong> {user ? 'Yes' : 'No'}</div>
+          <div><strong>User Email:</strong> {user?.email || 'N/A'}</div>
+          <div><strong>User Type:</strong> {userTypeInfo.type}</div>
+          <div><strong>Available Methods:</strong> {availableMethods.join(', ')}</div>
+          <div><strong>Payment Configs:</strong> {Object.keys(paymentConfigs).join(', ')}</div>
+        </div>
+      </div>
+
       {/* User Type Display */}
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
         <div className="flex items-center justify-between">
