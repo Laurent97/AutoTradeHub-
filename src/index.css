@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,6 +5,8 @@
 /* AutoVault - Automotive E-Commerce Design System */
 
 @layer base {
+  /* Import Google Fonts */
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
   :root {
     /* Light Mode - Amber Theme */
     --background: 0 0% 99%;
@@ -18,32 +18,26 @@
     --popover: 0 0% 100%;
     --popover-foreground: 24 10% 10%;
 
-    /* Primary - Amber */
     --primary: 38 92% 50%;
-    --primary-foreground: 0 0% 100%;
+    --primary-foreground: 48 96% 89%;
 
-    /* Secondary - Blue */
-    --secondary: 217 91% 60%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 24 9.8% 95%;
+    --secondary-foreground: 24 9.8% 15%;
 
-    /* Muted */
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 24 9.8% 95%;
+    --muted-foreground: 24 5.4% 46%;
 
-    /* Accent - Orange */
-    --accent: 24 95% 53%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 24 9.8% 95%;
+    --accent-foreground: 24 5.4% 46%;
 
-    /* Destructive */
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 60 9.8% 97%;
 
-    /* Borders & Inputs */
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
+    --border: 24 9.8% 85%;
+    --input: 24 9.8% 85%;
     --ring: 38 92% 50%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
     /* Custom Colors */
     --success: 142 76% 36%;
