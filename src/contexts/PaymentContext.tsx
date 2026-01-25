@@ -101,20 +101,34 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({ children }) =>
 
   const fetchPaymentConfigs = async () => {
     try {
+      console.log('🔍 PaymentContext: Starting to fetch payment configs');
+      
       const { data, error } = await supabase
         .from('payment_method_config')
         .select('*');
 
-      if (error) throw error;
+      console.log('🔍 PaymentContext: Payment configs query result:', { data, error });
+
+      if (error) {
+        console.error('🔍 PaymentContext: Error fetching payment configs:', error);
+        throw error;
+      }
+
+      if (!data || data.length === 0) {
+        console.log('🔍 PaymentContext: No payment configs found in database');
+        return;
+      }
 
       const configs: Record<PaymentMethod, PaymentMethodConfig | null> = {} as Record<PaymentMethod, PaymentMethodConfig | null>;
       data?.forEach(config => {
+        console.log('🔍 PaymentContext: Processing config:', config);
         configs[config.method_name as PaymentMethod] = config;
       });
 
+      console.log('🔍 PaymentContext: Final configs object:', configs);
       setPaymentConfigs(configs);
     } catch (error) {
-      console.error('Error fetching payment configs:', error);
+      console.error('🔍 PaymentContext: Error fetching payment configs:', error);
     } finally {
       setIsLoading(false);
     }
@@ -123,28 +137,44 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({ children }) =>
   // Get available payment methods based on user role
   const availableMethods: PaymentMethod[] = Object.entries(paymentConfigs)
     .filter(([_, config]) => {
-      if (!config || !config.enabled) return false;
+      console.log('🔍 PaymentContext: Checking method availability:', {
+        method: _,
+        config: config,
+        enabled: config?.enabled,
+        user: user?.email,
+        userProfile: userProfile
+      });
       
-      if (!user) return false;
+      if (!config || !config.enabled) {
+        console.log('🔍 PaymentContext: Method not available:', _, 'Reason: No config or disabled');
+        return false;
+      }
+      
+      if (!user) {
+        console.log('🔍 PaymentContext: Method not available:', _, 'Reason: No user');
+        return false;
+      }
       
       const userType = getUserType();
       
       switch (userType) {
         case 'customer':
-          console.log('🔍 PaymentContext: Checking customer access for', _[0]);
+          console.log('🔍 PaymentContext: Checking customer access for', _, 'Access:', config.customer_access);
           return config.customer_access;
         case 'partner':
-          console.log('🔍 PaymentContext: Checking partner access for', _[0]);
+          console.log('🔍 PaymentContext: Checking partner access for', _, 'Access:', config.partner_access);
           return config.partner_access;
         case 'admin':
-          console.log('🔍 PaymentContext: Checking admin access for', _[0]);
+          console.log('🔍 PaymentContext: Checking admin access for', _, 'Access:', config.admin_access);
           return config.admin_access;
         default:
-          console.log('🔍 PaymentContext: Unknown user type, denying access to', _[0]);
+          console.log('🔍 PaymentContext: Unknown user type, denying access to', _);
           return false;
       }
     })
     .map(([method]) => method as PaymentMethod);
+
+  console.log('🔍 PaymentContext: Final available methods:', availableMethods);
 
   // Check if user can use specific payment method
   const canUseMethod = (method: PaymentMethod): boolean => {
