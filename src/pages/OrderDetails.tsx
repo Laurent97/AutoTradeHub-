@@ -230,6 +230,7 @@ export default function OrderDetails() {
       
       console.log('=== ORDER LOOKUP SUCCESS ===');
       console.log('Full order data:', data);
+      console.log('Customer info:', data.customer);
       console.log('Shipping address:', data.shipping_address);
       console.log('Shipping address TYPE:', typeof data.shipping_address);
       console.log('Shipping address KEYS:', data.shipping_address ? Object.keys(data.shipping_address) : 'NULL');

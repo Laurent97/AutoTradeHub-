@@ -81,16 +81,14 @@ export const orderService = {
   async getOrderById(orderId: string) {
     const { data, error } = await supabase
       .from('orders')
-      .select(
-        `
+      .select(`
         *,
-        user:users(id, email, full_name),
+        customer:users!orders_customer_id_fkey(id, email, full_name),
         order_items (
           *,
           product:products (*)
         )
-      `
-      )
+      `)
       .eq('id', orderId)
       .maybeSingle();
 
@@ -103,16 +101,14 @@ export const orderService = {
   async getOrderByNumber(orderNumber: string) {
     const { data, error } = await supabase
       .from('orders')
-      .select(
-        `
+      .select(`
         *,
-        user:users(id, email, full_name),
+        customer:users!orders_customer_id_fkey(id, email, full_name),
         order_items (
           *,
           product:products (*)
         )
-      `
-      )
+      `)
       .eq('order_number', orderNumber)
       .limit(1)
       .maybeSingle();
@@ -126,16 +122,14 @@ export const orderService = {
   async getCustomerOrders(customerId: string, limit = 50) {
     const { data, error } = await supabase
       .from('orders')
-      .select(
-        `
+      .select(`
         *,
-        user:users(id, email, full_name),
+        customer:users!orders_customer_id_fkey(id, email, full_name),
         order_items (
           *,
           product:products (*)
         )
-      `
-      )
+      `)
       .eq('customer_id', customerId)
       .order('created_at', { ascending: false })
       .limit(limit);
@@ -149,15 +143,14 @@ export const orderService = {
   async getPartnerOrders(partnerId: string, limit = 50) {
     const { data, error } = await supabase
       .from('orders')
-      .select(
-        `
+      .select(`
         *,
+        customer:users!orders_customer_id_fkey(id, email, full_name),
         order_items (
           *,
           product:products (*)
         )
-      `
-      )
+      `)
       .eq('partner_id', partnerId)
       .order('created_at', { ascending: false })
       .limit(limit);
