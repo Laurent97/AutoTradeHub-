@@ -161,10 +161,10 @@ export default function Store() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <div className="flex items-center justify-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
         <Footer />
       </div>
@@ -173,16 +173,16 @@ export default function Store() {
 
   if (error || !store) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-4 py-20">
           <div className="text-center">
-            <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Store Not Found</h1>
-            <p className="text-gray-600 mb-6">The store you're looking for doesn't exist or isn't available.</p>
+            <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-foreground mb-2">Store Not Found</h1>
+            <p className="text-muted-foreground mb-6">The store you're looking for doesn't exist or isn't available.</p>
             <button
               onClick={() => navigate('/stores')}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+              className="bg-primary text-primary-foreground px-6 py-2 rounded-lg hover:bg-primary/90"
             >
               Browse All Stores
             </button>
@@ -194,33 +194,33 @@ export default function Store() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Navbar />
       
       {/* Store Header */}
-      <div className="bg-white border-b">
+      <div className="bg-card border-border border-b">
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{store.store_name}</h1>
-              <p className="text-gray-600 mt-2">{store.description || 'Quality automotive parts and accessories'}</p>
+              <h1 className="text-3xl font-bold text-foreground">{store.store_name}</h1>
+              <p className="text-muted-foreground mt-2">{store.description || 'Quality automotive parts and accessories'}</p>
               <div className="flex items-center gap-4 mt-4">
                 <div className="flex items-center">
                   <Star className="w-5 h-5 text-yellow-400 fill-current" />
-                  <span className="ml-1 text-sm font-medium">4.8</span>
+                  <span className="ml-1 text-sm font-medium text-foreground">4.8</span>
                 </div>
-                <div className="flex items-center text-sm text-gray-600">
+                <div className="flex items-center text-sm text-muted-foreground">
                   <MessageCircle className="w-4 h-4 mr-1" />
                   Fast response
                 </div>
-                <div className="flex items-center text-sm text-gray-600">
+                <div className="flex items-center text-sm text-muted-foreground">
                   <TrendingUp className="w-4 h-4 mr-1" />
                   {products.length} products
                 </div>
               </div>
             </div>
             <div className="text-right">
-              <div className="text-sm text-gray-600">Store Status</div>
+              <div className="text-sm text-muted-foreground">Store Status</div>
               <div className="flex items-center">
                 <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
                 <span className="text-green-600 font-medium">Active</span>
@@ -233,15 +233,15 @@ export default function Store() {
       {/* Products Section */}
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Products</h2>
-          <p className="text-gray-600 mt-1">Browse our selection of quality automotive parts</p>
+          <h2 className="text-2xl font-bold text-foreground">Products</h2>
+          <p className="text-muted-foreground mt-1">Browse our selection of quality automotive parts</p>
         </div>
 
         {products.length === 0 ? (
           <div className="text-center py-12">
-            <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No Products Available</h3>
-            <p className="text-gray-600">This store hasn't added any products yet.</p>
+            <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-foreground mb-2">No Products Available</h3>
+            <p className="text-muted-foreground">This store hasn't added any products yet.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -251,9 +251,9 @@ export default function Store() {
               if (!product) return null;
 
               return (
-                <div key={storeProduct.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                <div key={storeProduct.id} className="bg-card rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-border">
                   {/* Product Image */}
-                  <div className="h-48 bg-gray-100 relative overflow-hidden">
+                  <div className="h-48 bg-muted relative overflow-hidden">
                     {product?.images?.[0] ? (
                       <img
                         src={product.images[0]}
@@ -261,9 +261,9 @@ export default function Store() {
                         className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                        <Package className="w-16 h-16 text-gray-400" />
-                        <p className="text-gray-500 text-sm mt-2">No Image</p>
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-border">
+                        <Package className="w-16 h-16 text-muted-foreground" />
+                        <p className="text-muted-foreground text-sm mt-2">No Image</p>
                       </div>
                     )}
                     <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
@@ -274,22 +274,21 @@ export default function Store() {
                   {/* Product Info */}
                   <div className="p-4">
                     <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-semibold text-lg text-gray-900">
+                      <h3 className="font-semibold text-lg text-foreground">
                         {product.make} {product.model}
                       </h3>
                       <div className="text-right">
-                        <span className="text-2xl font-bold text-blue-600">
+                        <span className="text-2xl font-bold text-primary">
                           {formatCurrency(storeProduct.selling_price)}
                         </span>
                       </div>
                     </div>
-                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                    <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
                       {product.description || 'Quality automotive part'}
                     </p>
                     <button
                       onClick={() => handleAddToCart(storeProduct)}
-                      className="w-full py-2 px-4 rounded-lg font-bold transition-colors bg-blue-600 text-white hover:bg-blue-700 shadow-md"
-                      style={{ backgroundColor: '#2563eb', color: '#ffffff' }}
+                      className="w-full py-2 px-4 rounded-lg font-bold transition-colors bg-primary text-primary-foreground hover:bg-primary/90 shadow-md"
                     >
                       Add to Cart
                     </button>

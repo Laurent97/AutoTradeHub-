@@ -95,17 +95,17 @@ const Cart = () => {
                     className="bg-card rounded-xl sm:rounded-2xl border border-border p-4 sm:p-6 flex flex-col sm:flex-row gap-4 sm:gap-6 hover:shadow-md transition-shadow"
                   >
                     {/* Product Image */}
-                    <div className="sm:w-32 sm:h-32 w-full h-48 relative overflow-hidden rounded-lg bg-gray-100">
+                    <div className="sm:w-32 sm:h-32 w-full h-48 relative overflow-hidden rounded-lg bg-muted">
                       {product.images?.[0] ? (
                         <img
                           src={product.images[0]}
-                          alt={`${product.make} ${product.model}`}
+                          alt={item.product?.title || `${item.product.make} ${item.product.model}`}
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                          <Package className="w-12 h-12 text-gray-400 mb-2" />
-                          <p className="text-gray-500 text-sm">No Image</p>
+                        <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-muted to-border">
+                          <Package className="w-12 h-12 text-muted-foreground mb-2" />
+                          <p className="text-muted-foreground text-sm">No Image</p>
                         </div>
                       )}
                       <div className={`absolute top-2 right-2 ${stockColor} text-white px-2 py-1 rounded-full text-xs font-semibold`}>
@@ -117,14 +117,14 @@ const Cart = () => {
                     <div className="flex-1">
                       <div className="flex flex-col sm:flex-row justify-between items-start mb-2">
                         <div className="flex-1">
-                          <h3 className="font-semibold text-lg text-gray-900">
+                          <h3 className="font-semibold text-lg text-foreground">
                             {item.product?.title || `${item.product.make} ${item.product.model}`}
                           </h3>
-                          <p className="text-gray-600 text-sm mb-1">
+                          <p className="text-muted-foreground text-sm mb-1">
                             SKU: {item.product?.sku || 'N/A'} | Category: {item.product?.category || 'General'}
                           </p>
                           {item.partner_product && (
-                            <p className="text-gray-500 text-xs">
+                            <p className="text-muted-foreground text-xs">
                               Sold by: {item.partner_store_name || item.partner_product?.partner_store_name || 'Partner Store'}
                             </p>
                           )}
@@ -134,14 +134,14 @@ const Cart = () => {
                             {formatPrice(item.unit_price)}
                           </span>
                           {item.unit_price < product.original_price && (
-                            <p className="text-sm text-gray-500 line-through">
+                            <p className="text-sm text-muted-foreground line-through">
                               {formatPrice(product.original_price)}
                             </p>
                           )}
                         </div>
                       </div>
                       
-                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                      <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
                         {product.description || 'Quality automotive part'}
                       </p>
 
@@ -167,7 +167,7 @@ const Cart = () => {
                             <Plus className="w-3 h-3" />
                           </Button>
                           {product.stock_quantity > 0 && (
-                            <span className="text-xs text-gray-500 ml-2">
+                            <span className="text-xs text-muted-foreground ml-2">
                               {product.stock_quantity} in stock
                             </span>
                           )}
@@ -178,7 +178,7 @@ const Cart = () => {
                             <span className="text-base sm:text-lg font-bold text-foreground block">
                               {formatPrice(item.subtotal)}
                             </span>
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-muted-foreground">
                               {item.quantity} × {formatPrice(item.unit_price)}
                             </span>
                           </div>
@@ -234,7 +234,7 @@ const Cart = () => {
                     <span>Total</span>
                     <span>{formatPrice(orderTotal)}</span>
                   </div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-muted-foreground">
                     *Taxes calculated at checkout
                   </div>
                 </div>
