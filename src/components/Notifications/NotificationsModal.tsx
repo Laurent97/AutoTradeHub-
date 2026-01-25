@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bell, Check, Trash2, Filter, Eye, EyeOff, Package, CreditCard, MessageSquare, Gift, Truck, Settings, X, Sparkles, Clock, AlertCircle } from 'lucide-react';
+import { Bell, Check, Trash2, Filter, Eye, EyeOff, Package, CreditCard, MessageSquare, Gift, Truck, Settings, X, Sparkles, Clock, AlertCircle, ArrowLeft } from 'lucide-react';
 import { notificationService } from '@/services/notificationService';
 import { supabase } from '@/lib/supabase/client';
 import type { Notification, NotificationType } from '@/lib/types/notifications';
@@ -156,6 +156,18 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({ isOpen, onClose
         <div className="bg-gradient-to-r from-primary/5 via-transparent to-primary/5 border-b border-border/50 backdrop-blur-sm p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
+              <Button
+                onClick={() => {
+                  onClose();
+                  window.history.back();
+                }}
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 hover:bg-muted/50 hover:text-foreground transition-all duration-200"
+                title="Go back"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
               <div className="relative">
                 <div className="absolute inset-0 bg-primary/20 rounded-full animate-pulse"></div>
                 <Bell className="w-7 h-7 text-primary relative z-10" />
