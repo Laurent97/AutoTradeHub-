@@ -2,16 +2,47 @@ import { supabase } from './client';
 import { LikedItem, LikedItemsResponse, LikeResponse, LikeStatus, LikedItemData } from '../types/liked-items';
 
 export class LikedItemsService {
+  private static tableExists: boolean | null = null;
+
+  // Check if liked_items table exists (cached)
+  private static async checkTableExists(): Promise<boolean> {
+    if (this.tableExists !== null) return this.tableExists;
+    
+    try {
+      const { data, error } = await supabase
+        .from('liked_items')
+        .select('id')
+        .limit(1);
+      
+      this.tableExists = !error;
+      return this.tableExists;
+    } catch (error) {
+      console.error('Error checking liked_items table:', error);
+      this.tableExists = false;
+      return false;
+    }
+  }
   // Like an item
   static async likeItem(itemType: string, itemId: string, itemData: LikedItemData): Promise<LikeResponse> {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
+      const tableExists = await this.checkTableExists();
+      
+      if (!tableExists) {
+        console.warn('liked_items table not available');
+        return { 
+          success: false, 
+          isLiked: false, 
+          totalLikes: 0
+        };
+      }
+
       // Check if already liked
       const { data: existing } = await supabase
         .from('liked_items')
-        .select('*')
+        .select('id')
         .eq('user_id', user.id)
         .eq('item_id', itemId)
         .eq('item_type', itemType)
@@ -134,11 +165,24 @@ export class LikedItemsService {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
+      const tableExists = await this.checkTableExists();
+      
+      if (!tableExists) {
+        console.warn('liked_items table not available');
+        return {
+          items: [],
+          total: 0,
+          page,
+          limit,
+          hasMore: false
+        };
+      }
+
       let query = supabase
         .from('liked_items')
-        .select('*', { count: 'exact' })
+        .select('*')
         .eq('user_id', user.id)
-        .order('liked_at', { ascending: false });
+        .order('created_at', { ascending: false });
 
       // Try to filter by status if item_data column exists
       try {
@@ -172,7 +216,7 @@ export class LikedItemsService {
         total: 0,
         page,
         limit,
-        hasMore: false,
+        hasMore: false
       };
     }
   }
@@ -183,14 +227,21 @@ export class LikedItemsService {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return { isLiked: false, totalLikes: 0 };
 
+      const tableExists = await this.checkTableExists();
+      
+      if (!tableExists) {
+        console.warn('liked_items table not available');
+        return { isLiked: false, totalLikes: 0 };
+      }
+
       // Check if user liked this item
       const { data: userLike } = await supabase
         .from('liked_items')
-        .select('*')
+        .select('id')
         .eq('user_id', user.id)
         .eq('item_id', itemId)
         .eq('item_type', itemType)
-        .single();
+        .limit(1);
 
       // Get total likes count
       const { count } = await supabase
