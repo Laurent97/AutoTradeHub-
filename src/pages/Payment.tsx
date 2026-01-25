@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { orderService } from '../lib/supabase/order-service';
-import PaymentOptions from '../components/Payment/PaymentOptions';
+import PaymentMethodSelector from '../components/Payment/PaymentMethodSelector';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { ArrowLeft, Package } from 'lucide-react';
@@ -53,88 +53,15 @@ export default function Payment() {
     }
   }, [items, location.state, navigate]);
 
-  const handlePaymentSuccess = async (paymentData: any) => {
-    if (!user) {
-      alert('Please login to complete your order');
-      return;
-    }
-
-    try {
-      // Get shipping address from checkout state
-      const checkoutShippingAddress = location.state?.shippingAddress;
-      
-      console.log('=== SHIPPING ADDRESS DEBUG ===');
-      console.log('Location state:', location.state);
-      console.log('Shipping address from checkout:', checkoutShippingAddress);
-      
-      if (!checkoutShippingAddress) {
-        console.error('❌ NO SHIPPING ADDRESS FOUND - This should not happen!');
-        console.error('❌ Current location.state:', location.state);
-        console.error('❌ Items in cart:', items);
-        throw new Error('Shipping address is required. Please complete the checkout process first.');
-      }
-      
-      console.log('✅ Shipping address found:', checkoutShippingAddress);
-      
-      // Prepare order data similar to Checkout.tsx
-      const orderItems = items.map((item) => ({
-        product_id: item.product.id,
-        partner_product_id: item.partner_product?.id && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(item.partner_product.id) ? item.partner_product.id : null,
-        quantity: item.quantity,
-        unit_price: item.unit_price,
-      }));
-
-      const orderData = {
-        customer_id: user.id,
-        items: orderItems,
-        shipping_address: checkoutShippingAddress,
-        payment_method: paymentData.method || 'card',
-        payment_intent_id: paymentData.paymentIntentId,
-      };
-
-      console.log('=== ORDER CREATION DATA ===');
-      console.log('Full order data:', JSON.stringify(orderData, null, 2));
-      console.log('Shipping address being saved:', orderData.shipping_address);
-
-      console.log('=== PAYMENT ORDER CREATION DEBUG ===');
-      console.log('Creating order with data:', orderData);
-
-      const { data: order, error } = await orderService.createOrder(orderData);
-
-      console.log('Payment order creation result:', { data: order, error });
-
-      if (error) {
-        console.error('Payment order creation failed:', error);
-        throw error;
-      }
-
-      if (!order) {
-        console.error('Payment order creation returned null data');
-        throw new Error('Order creation failed: No order data returned');
-      }
-
-      console.log('Payment order created successfully:', {
-        id: order.id,
-        order_number: order.order_number,
-        customer_id: order.customer_id,
-        total_amount: order.total_amount
-      });
-
-      // Clear cart
-      clearCart();
-      
-      // Redirect to success page with actual order data
-      navigate('/order-success', {
-        state: {
-          orderId: order.order_number,
-          orderData: order,
-          paymentData: paymentData,
-        },
-      });
-    } catch (error: any) {
-      console.error('Payment order creation error:', error);
-      alert(`Order creation failed: ${error.message || 'Please try again later.'}`);
-    }
+  const handlePaymentSuccess = () => {
+    // For now, just redirect to success page
+    // In a real implementation, this would handle the payment completion
+    navigate('/order-success', {
+      state: {
+        orderId: orderId,
+        message: 'Payment submitted successfully. Your order will be processed after verification.'
+      },
+    });
   };
 
   const handlePaymentError = (error: string) => {
@@ -195,9 +122,9 @@ export default function Payment() {
                     </button>
                   </div>
                 ) : (
-                  <PaymentOptions
+                  <PaymentMethodSelector
+                    orderId={orderId || ''}
                     amount={amount}
-                    orderId={orderId}
                     onPaymentSuccess={handlePaymentSuccess}
                     onPaymentError={handlePaymentError}
                   />

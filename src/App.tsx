@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Outlet, Navigate } from "react-router-dom
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { CartProvider } from "./contexts/CartContext";
+import { PaymentProvider } from "./contexts/PaymentContext";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import WhatsAppFloating from "./components/CustomerService/WhatsAppFloating";
 import { AdminOnlyRoute, PartnerOnlyRoute } from "./components/RoleBasedRoute";
@@ -64,6 +65,7 @@ import TrackOrder from "./pages/TrackOrder";
 // Payment components for dashboard integration
 import CryptoDeposit from "./components/Payment/CryptoDeposit";
 import WithdrawalForm from "./components/Payment/WithdrawalForm";
+import PaymentVerification from "./components/Admin/PaymentVerification";
 
 const queryClient = new QueryClient();
 
@@ -73,12 +75,13 @@ const App = () => (
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <CartProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <WhatsAppFloating />
-                <Routes>
+            <PaymentProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <WhatsAppFloating />
+                  <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/products" element={<Products />} />
           <Route path="/products-legacy" element={<Products />} />
@@ -116,6 +119,7 @@ const App = () => (
               <Route path="/admin/partners" element={<AdminOnlyRoute><AdminPartners /></AdminOnlyRoute>} />
               <Route path="/admin/partners-test" element={<AdminOnlyRoute><AdminPartnersTest /></AdminOnlyRoute>} />
               <Route path="/admin/orders" element={<AdminOnlyRoute><AdminOrders /></AdminOnlyRoute>} />
+              <Route path="/admin/payments" element={<AdminOnlyRoute><PaymentVerification /></AdminOnlyRoute>} />
               <Route path="/admin/settings" element={<AdminOnlyRoute><AdminSettings /></AdminOnlyRoute>} />
               <Route path="/shipping" element={<Shipping />} />
               <Route path="/track" element={<TrackOrder />} />
@@ -143,11 +147,12 @@ const App = () => (
             </Routes>
             </BrowserRouter>
             </TooltipProvider>
-          </CartProvider>
-        </AuthProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
-  </ErrorBoundary>
+          </PaymentProvider>
+        </CartProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  </ThemeProvider>
+</ErrorBoundary>
 );
 
 export default App;
