@@ -184,7 +184,7 @@ const PartnerRegistrationForm: React.FC = () => {
         // Use simple validation for now to get basic codes working
         const { data, error } = await supabase
           .from('partner_profiles')
-          .select('store_id, store_name, store_logo, referral_bonus_active')
+          .select('id, store_id, store_name, store_logo, referral_bonus_active')
           .or(`store_id.eq.${formData.invitationCode},referral_code.eq.${formData.invitationCode},invitation_code.eq.${formData.invitationCode}`)
           .eq('partner_status', 'approved')
           .eq('is_active', true)
@@ -214,7 +214,7 @@ const PartnerRegistrationForm: React.FC = () => {
         setInvitationValidation({
           valid: true,
           referrerName: data.store_name,
-          referrerId: data.store_id,
+          referrerId: data.id, // Use the UUID (id field) instead of store_id
           referrerLogo: data.store_logo,
           hasBonus: data.referral_bonus_active,
           benefits: ['Welcome bonus', 'Priority support', 'Lower commission for first 3 months']
