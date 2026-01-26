@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Store, Users, TrendingUp, Shield, Star, CheckCircle } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import PartnerRegistrationFormSimple from '../components/Partner/PartnerRegistrationFormSimple';
+import PartnerRegistrationForm from '../components/Partner/PartnerRegistrationForm';
 
 const BecomePartner: React.FC = () => {
   const navigate = useNavigate();
@@ -143,7 +143,7 @@ const BecomePartner: React.FC = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="px-6 pb-8">
-                <PartnerRegistrationFormSimple />
+                <PartnerRegistrationForm />
               </CardContent>
             </Card>
           </div>
