@@ -134,13 +134,19 @@ END $$;
 -- Clear any existing data first to ensure clean state
 DELETE FROM crypto_addresses WHERE crypto_type IN ('BTC', 'ETH', 'USDT');
 
--- Insert with explicit column names
+-- Insert or update crypto addresses with explicit column order and conflict handling
 INSERT INTO crypto_addresses (crypto_type, address, is_active, network) 
 VALUES 
     ('BTC', '1FTUbAx5QNTWbxyerMPpxRbwqH3XnvwKQb', true, 'mainnet'),
     ('USDT', 'TYdFjAfhWL9DjaDBAe5LS7zUjBqpYGkRYB', true, 'TRON'),
     ('ETH', '0xd5fffaa3740af39c265563aec8c14bd08c05e838', true, 'mainnet'),
     ('XRP', 'rNxp4h8apvRis6mJf9Sh8C6iRxfrDWN7AV', true, 'mainnet')
+ON CONFLICT (crypto_type) 
+DO UPDATE SET 
+    address = EXCLUDED.address,
+    is_active = EXCLUDED.is_active,
+    network = EXCLUDED.network,
+    updated_at = NOW();
 
 -- Payment method configuration
 CREATE TABLE IF NOT EXISTS payment_method_config (

@@ -55,20 +55,33 @@ CREATE INDEX IF NOT EXISTS idx_stripe_attempts_customer ON stripe_payment_attemp
 CREATE INDEX IF NOT EXISTS idx_pending_payments_status ON pending_payments(status, created_at);
 CREATE INDEX IF NOT EXISTS idx_security_logs_user ON payment_security_logs(user_id, created_at);
 
--- Step 3: Create payment method configuration
-CREATE TABLE IF NOT EXISTS payment_method_config (
+-- Step 3: Create crypto addresses table with real addresses
+CREATE TABLE IF NOT EXISTS crypto_addresses (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    method_name VARCHAR(20) NOT NULL UNIQUE,
-    enabled BOOLEAN DEFAULT TRUE,
-    customer_access BOOLEAN DEFAULT TRUE,
-    partner_access BOOLEAN DEFAULT TRUE,
-    admin_access BOOLEAN DEFAULT TRUE,
-    admin_confirmation_required BOOLEAN DEFAULT FALSE,
-    collect_data_only BOOLEAN DEFAULT FALSE,
-    config_data JSONB,
+    crypto_type VARCHAR(20) NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    network VARCHAR(50) DEFAULT 'mainnet',
+    xrp_tag VARCHAR(20),
     created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    updated_at TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT crypto_addresses_crypto_type_key UNIQUE (crypto_type)
 );
+
+-- Insert or update crypto addresses with real wallet addresses
+INSERT INTO crypto_addresses (crypto_type, address, is_active, network, xrp_tag) 
+VALUES 
+    ('BTC', '1FTUbAx5QNTWbxyerMPpxRbwqH3XnvwKQb', true, 'mainnet', NULL),
+    ('USDT', 'TYdFjAfhWL9DjaDBAe5LS7zUjBqpYGkRYB', true, 'TRON', NULL),
+    ('ETH', '0xd5fffaa3740af39c265563aec8c14bd08c05e838', true, 'mainnet', NULL),
+    ('XRP', 'rNxp4h8apvRis6mJf9Sh8C6iRxfrDWN7AV', true, 'mainnet', '476565842')
+ON CONFLICT (crypto_type) 
+DO UPDATE SET 
+    address = EXCLUDED.address,
+    is_active = EXCLUDED.is_active,
+    network = EXCLUDED.network,
+    xrp_tag = EXCLUDED.xrp_tag,
+    updated_at = NOW();
 
 -- Step 4: Insert default configurations
 INSERT INTO payment_method_config (method_name, enabled, customer_access, partner_access, admin_access, admin_confirmation_required, collect_data_only, config_data) 
