@@ -99,28 +99,29 @@ export default function DepositForm() {
     setLoading(true);
     
     try {
-      // Simulate API call for deposit processing
+      // Simulate API call for deposit request submission (not processing)
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Show success message
+      // Show success message for request submission
       toast({
-        title: "Deposit Successful!",
-        description: `$${formData.amount.toFixed(2)} has been added to your wallet.`,
+        title: "Deposit Request Submitted!",
+        description: `$${formData.amount.toFixed(2)} deposit request has been submitted for admin approval.`,
       });
       
       // Navigate back to wallet
       navigate('/partner/dashboard/wallet', {
         state: {
           success: true,
-          message: `Deposit successful! $${formData.amount.toFixed(2)} has been added to your wallet.`,
-          amount: formData.amount
+          message: `Deposit request of $${formData.amount.toFixed(2)} has been submitted for admin approval. You will be notified once it's approved.`,
+          amount: formData.amount,
+          pendingApproval: true
         }
       });
       
     } catch (error) {
       toast({
-        title: "Deposit Failed",
-        description: "There was an error processing your deposit. Please try again.",
+        title: "Deposit Request Failed",
+        description: "There was an error submitting your deposit request. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -424,14 +425,13 @@ export default function DepositForm() {
             </div>
           </div>
           {renderPaymentMethodForm()}
-          
           <Button 
             onClick={handlePaymentSubmit}
             disabled={loading}
             className="w-full"
             size="lg"
           >
-            {loading ? 'Processing Deposit...' : `Deposit ${formatCurrency(formData.amount)}`}
+            {loading ? 'Submitting Request...' : `Submit Deposit Request ${formatCurrency(formData.amount)}`}
           </Button>
         </div>
       )}

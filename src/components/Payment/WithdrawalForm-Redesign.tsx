@@ -118,28 +118,29 @@ export default function WithdrawalForm() {
     setLoading(true);
     
     try {
-      // Simulate API call for withdrawal processing
+      // Simulate API call for withdrawal request submission (not processing)
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Show success message
+      // Show success message for request submission
       toast({
-        title: "Withdrawal Requested!",
-        description: `$${formData.amount.toFixed(2)} withdrawal request has been submitted for processing.`,
+        title: "Withdrawal Request Submitted!",
+        description: `$${getNetAmount().toFixed(2)} withdrawal request has been submitted for admin approval.`,
       });
       
       // Navigate back to wallet
       navigate('/partner/dashboard/wallet', {
         state: {
           success: true,
-          message: `Withdrawal request of $${formData.amount.toFixed(2)} has been submitted successfully.`,
-          amount: formData.amount
+          message: `Withdrawal request of $${getNetAmount().toFixed(2)} has been submitted for admin approval. You will be notified once it's approved.`,
+          amount: getNetAmount(),
+          pendingApproval: true
         }
       });
       
     } catch (error) {
       toast({
-        title: "Withdrawal Failed",
-        description: "There was an error processing your withdrawal. Please try again.",
+        title: "Withdrawal Request Failed",
+        description: "There was an error submitting your withdrawal request. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -427,7 +428,7 @@ export default function WithdrawalForm() {
                 disabled={loading}
                 className="flex-1"
               >
-                {loading ? 'Processing...' : `Withdraw ${formatCurrency(getNetAmount())}`}
+                {loading ? 'Processing...' : `Submit Withdrawal Request ${formatCurrency(getNetAmount())}`}
               </Button>
             </div>
           </CardContent>
@@ -463,7 +464,7 @@ export default function WithdrawalForm() {
             className="w-full"
             size="lg"
           >
-            {loading ? 'Processing Withdrawal...' : `Withdraw ${formatCurrency(getNetAmount())}`}
+            {loading ? 'Submitting Request...' : `Submit Withdrawal Request ${formatCurrency(getNetAmount())}`}
           </Button>
         </div>
       )}

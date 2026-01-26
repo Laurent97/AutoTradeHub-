@@ -129,7 +129,7 @@ export const walletService = {
     }
   },
 
-  // Add funds to wallet
+  // Add funds to wallet (pending approval)
   async addFunds(userId: string, amount: number, paymentMethod: string, description: string): Promise<{ data: WalletTransaction | null; error: any }> {
     try {
       const { data: transaction, error: transactionError } = await supabase
@@ -138,7 +138,7 @@ export const walletService = {
           user_id: userId,
           type: 'deposit',
           amount,
-          status: 'completed',
+          status: 'pending', // Changed from 'completed' to 'pending'
           description,
           payment_method: paymentMethod,
           created_at: new Date().toISOString(),
@@ -149,20 +149,7 @@ export const walletService = {
 
       if (transactionError) throw transactionError;
 
-      // Update wallet balance
-      const { data: currentBalance } = await this.getBalance(userId);
-      if (currentBalance) {
-        const { error: updateError } = await supabase
-          .from('wallet_balances')
-          .update({
-            balance: currentBalance.balance + amount,
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', userId);
-
-        if (updateError) throw updateError;
-      }
-
+      // Do NOT update wallet balance immediately - wait for admin approval
       return { data: transaction, error: null };
     } catch (error) {
       console.error('Error adding funds:', error);
@@ -170,7 +157,7 @@ export const walletService = {
     }
   },
 
-  // Withdraw funds from wallet
+  // Withdraw funds from wallet (pending approval)
   async withdrawFunds(userId: string, amount: number, paymentMethod: string, description: string): Promise<{ data: WalletTransaction | null; error: any }> {
     try {
       const { data: balance, error: balanceError } = await this.getBalance(userId);
@@ -186,7 +173,7 @@ export const walletService = {
           user_id: userId,
           type: 'withdrawal',
           amount,
-          status: 'completed',
+          status: 'pending', // Changed from 'completed' to 'pending'
           description,
           payment_method: paymentMethod,
           created_at: new Date().toISOString(),
@@ -197,17 +184,7 @@ export const walletService = {
 
       if (transactionError) throw transactionError;
 
-      // Update wallet balance
-      const { error: updateError } = await supabase
-        .from('wallet_balances')
-        .update({
-          balance: balance.balance - amount,
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', userId);
-
-      if (updateError) throw updateError;
-
+      // Do NOT update wallet balance immediately - wait for admin approval
       return { data: transaction, error: null };
     } catch (error) {
       console.error('Error withdrawing funds:', error);
@@ -242,6 +219,127 @@ export const walletService = {
       return { data, error };
     } catch (error) {
       console.error('Error updating wallet balance:', error);
+      return { data: null, error };
+    }
+  },
+
+  // Admin: Approve pending deposit
+  async approveDeposit(transactionId: string): Promise<{ data: WalletTransaction | null; error: any }> {
+    try {
+      // Get the transaction
+      const { data: transaction, error: fetchError } = await supabase
+        .from('wallet_transactions')
+        .select('*')
+        .eq('id', transactionId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      if (transaction.status !== 'pending') {
+        throw new Error('Transaction is not pending approval');
+      }
+
+      // Update transaction status to completed
+      const { data: updatedTransaction, error: updateError } = await supabase
+        .from('wallet_transactions')
+        .update({
+          status: 'completed',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', transactionId)
+        .select()
+        .single();
+
+      if (updateError) throw updateError;
+
+      // Update wallet balance
+      const { error: balanceError } = await supabase
+        .from('wallet_balances')
+        .update({
+          balance: transaction.amount,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', transaction.user_id);
+
+      if (balanceError) throw balanceError;
+
+      return { data: updatedTransaction, error: null };
+    } catch (error) {
+      console.error('Error approving deposit:', error);
+      return { data: null, error };
+    }
+  },
+
+  // Admin: Approve pending withdrawal
+  async approveWithdrawal(transactionId: string): Promise<{ data: WalletTransaction | null; error: any }> {
+    try {
+      // Get the transaction
+      const { data: transaction, error: fetchError } = await supabase
+        .from('wallet_transactions')
+        .select('*')
+        .eq('id', transactionId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      if (transaction.status !== 'pending') {
+        throw new Error('Transaction is not pending approval');
+      }
+
+      // Update transaction status to completed
+      const { data: updatedTransaction, error: updateError } = await supabase
+        .from('wallet_transactions')
+        .update({
+          status: 'completed',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', transactionId)
+        .select()
+        .single();
+
+      if (updateError) throw updateError;
+
+      // Update wallet balance
+      const { error: balanceError } = await supabase
+        .from('wallet_balances')
+        .update({
+          balance: -transaction.amount,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', transaction.user_id);
+
+      if (balanceError) throw balanceError;
+
+      return { data: updatedTransaction, error: null };
+    } catch (error) {
+      console.error('Error approving withdrawal:', error);
+      return { data: null, error };
+    }
+  },
+
+  // Admin: Reject transaction
+  async rejectTransaction(transactionId: string, reason: string): Promise<{ data: WalletTransaction | null; error: any }> {
+    try {
+      const { data: transaction } = await supabase
+        .from('wallet_transactions')
+        .select('*')
+        .eq('id', transactionId)
+        .single();
+
+      const { data: updatedTransaction, error } = await supabase
+        .from('wallet_transactions')
+        .update({
+          status: 'rejected',
+          description: `${transaction?.description || ''} - Rejected: ${reason}`,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', transactionId)
+        .select()
+        .single();
+
+      return { data: updatedTransaction, error };
+    } catch (error) {
+      console.error('Error rejecting transaction:', error);
       return { data: null, error };
     }
   }
