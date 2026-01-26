@@ -42,13 +42,13 @@ const AdminDashboard = () => {
       return;
     }
 
-    // Calculate stats from real-time data
+    // Calculate stats from real-time data with null checks
     if (users && orders && partners) {
-      const totalUsers = users.length;
-      const totalPartners = partners.length;
-      const totalOrders = orders.length;
-      const totalRevenue = orders.reduce((sum, order) => sum + (order.total_amount || 0), 0);
-      const pendingPartners = partners.filter(p => p.partner_status === 'pending').length;
+      const totalUsers = users?.length || 0;
+      const totalPartners = partners?.length || 0;
+      const totalOrders = orders?.length || 0;
+      const totalRevenue = orders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0;
+      const pendingPartners = partners?.filter(p => p.partner_status === 'pending').length || 0;
 
       setStats({
         totalUsers,
@@ -111,7 +111,7 @@ const AdminDashboard = () => {
                 <div className="bg-gradient-to-r from-primary to-primary/90 rounded-lg sm:rounded-xl lg:rounded-2xl p-3 sm:p-4 lg:p-6 text-primary-foreground shadow-lg flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                   <div>
                     <h1 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold mb-1 sm:mb-2">Dashboard</h1>
-                    <p className="text-primary-foreground/90 text-sm sm:text-base lg:text-lg">Welcome back, <span className="font-semibold truncate max-w-[200px] sm:max-w-none inline-block">{userProfile?.email?.split('@')[0]}</span></p>
+                    <p className="text-primary-foreground/90 text-sm sm:text-base lg:text-lg">Welcome back, <span className="font-semibold truncate max-w-[200px] sm:max-w-none inline-block">{userProfile?.email?.split('@')[0] || 'Admin'}</span></p>
                     <p className="text-primary-foreground/70 mt-1 text-xs sm:text-sm lg:text-base hidden xs:block">Here's what's happening with your business today</p>
                     {lastUpdate && (
                       <p className="text-primary-foreground/50 text-xs mt-1">Last updated: {lastUpdate.toLocaleTimeString()}</p>
@@ -219,7 +219,7 @@ const AdminDashboard = () => {
                       </div>
                     ) : (
                       <div className="space-y-2 sm:space-y-3">
-                        {orders.slice(0, 5).map((order, idx) => (
+                        {orders?.slice(0, 5).map((order, idx) => (
                           <Link
                             key={order.id}
                             to="/admin/orders"
@@ -232,19 +232,19 @@ const AdminDashboard = () => {
                                   <span className="text-xs sm:text-sm font-bold text-purple-600 dark:text-purple-400">#</span>
                                 </div>
                                 <div>
-                                  <p className="font-semibold text-foreground text-sm sm:text-base truncate max-w-[150px] sm:max-w-none">{order.order_number}</p>
-                                  <p className="text-xs text-muted-foreground">${order.total_amount.toFixed(2)}</p>
+                                  <p className="font-semibold text-foreground text-sm sm:text-base truncate max-w-[150px] sm:max-w-none">{order?.order_number || 'Unknown'}</p>
+                                  <p className="text-xs text-muted-foreground">${(order?.total_amount || 0).toFixed(2)}</p>
                                 </div>
                               </div>
                             </div>
                             <div className="flex items-center gap-2 sm:gap-3">
                               <span className={`px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs font-semibold ${
-                                order.status === 'delivered' ? 'bg-green-100 text-green-700' :
-                                order.status === 'shipped' ? 'bg-blue-100 text-blue-700' :
-                                order.status === 'processing' ? 'bg-amber-100 text-amber-700' :
+                                order?.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                                order?.status === 'shipped' ? 'bg-blue-100 text-blue-700' :
+                                order?.status === 'processing' ? 'bg-amber-100 text-amber-700' :
                                 'bg-slate-100 text-slate-700'
                               }`}>
-                                {order.status}
+                                {order?.status || 'Unknown'}
                               </span>
                             </div>
                           </Link>
@@ -294,13 +294,13 @@ const AdminDashboard = () => {
                       <h3 className="font-bold text-foreground text-sm sm:text-base">Recent Users</h3>
                     </div>
                     <div className="space-y-2 sm:space-y-3">
-                      {users && users.slice(0, 3).map((userItem) => (
-                        <div key={userItem.id} className="flex items-center justify-between">
+                      {users?.slice(0, 3).map((userItem) => (
+                        <div key={userItem?.id} className="flex items-center justify-between">
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs sm:text-sm font-medium text-foreground truncate">{userItem.full_name || userItem.email?.split('@')[0]}</p>
-                            <p className="text-xs text-muted-foreground capitalize">{userItem.user_type}</p>
+                            <p className="text-xs sm:text-sm font-medium text-foreground truncate">{userItem?.full_name || userItem?.email?.split('@')[0] || 'Unknown User'}</p>
+                            <p className="text-xs text-muted-foreground capitalize">{userItem?.user_type || 'unknown'}</p>
                           </div>
-                          {userItem.user_type === 'partner' && userItem.partner_status === 'approved' && (
+                          {userItem?.user_type === 'partner' && userItem?.partner_status === 'approved' && (
                             <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-600 flex-shrink-0" />
                           )}
                         </div>
