@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Search, MapPin, Star, Phone, Mail, Globe, Filter, Grid, List, Heart, Store, ChevronRight, Users, Package, TrendingUp } from "lucide-react";
+import { Search, MapPin, Star, Phone, Mail, Globe, Filter, Grid, List, Heart, Store, ChevronRight, Users, Package, TrendingUp, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -321,6 +321,8 @@ const ShopCard = ({ shop }: { shop: PartnerShop }) => {
 export default function Manufacturers() {
   const [shops, setShops] = useState<PartnerShop[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -329,6 +331,30 @@ export default function Manufacturers() {
 
   useEffect(() => {
     loadShops();
+    
+    // Set up real-time subscription for partner profiles
+    const subscription = supabase
+      .channel('partner_profiles_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to all changes (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'partner_profiles'
+        },
+        (payload) => {
+          console.log('Partner profiles changed:', payload);
+          setLastUpdate(new Date());
+          // Reload shops when there are changes
+          loadShops();
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscription on unmount
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const loadShops = async () => {
@@ -378,11 +404,18 @@ export default function Manufacturers() {
       console.log('Loaded shops:', data?.length || 0);
       console.log('Shop data:', data);
       setShops(data || []);
+      setLastUpdate(new Date());
     } catch (error) {
       console.error('Error loading shops:', error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    loadShops();
   };
 
   const loadStats = async () => {
@@ -529,11 +562,28 @@ export default function Manufacturers() {
             </div>
           </div>
 
-          {/* Results Count */}
-          <div className="mb-6">
+          {/* Results Count and Refresh */}
+          <div className="mb-6 flex items-center justify-between">
             <p className="text-muted-foreground">
               {loading ? 'Loading...' : `Showing ${filteredShops.length} of ${shops.length} shops`}
             </p>
+            <div className="flex items-center gap-4">
+              {lastUpdate && (
+                <span className="text-xs text-muted-foreground">
+                  Last updated: {lastUpdate.toLocaleTimeString()}
+                </span>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefresh}
+                disabled={refreshing || loading}
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+                {refreshing ? 'Refreshing...' : 'Refresh'}
+              </Button>
+            </div>
           </div>
 
           {/* Shops Grid */}
