@@ -629,28 +629,28 @@ const PartnerRegistrationForm: React.FC = () => {
         <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full mb-4">
           <Store className="w-8 h-8 text-white" />
         </div>
-        <h2 className="text-2xl font-bold dark:text-white text-gray-900">Business Information</h2>
-        <p className="dark:text-gray-300 text-gray-600">Tell us about your store</p>
+        <h2 className="text-2xl font-bold text-foreground mb-6">Business Information</h2>
+        <p className="text-muted-foreground">Tell us about your store</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-6">
           <div>
-            <label className="block text-sm font-semibold dark:text-gray-200 text-gray-900 mb-2">
+            <label className="block text-sm font-semibold text-foreground mb-2">
               Store Name *
             </label>
             <input
               type="text"
               value={formData.storeName}
               onChange={(e) => setFormData({...formData, storeName: e.target.value})}
-              className="w-full px-4 py-3 dark:bg-gray-800 dark:border-gray-700 dark:text-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 bg-card border border-border text-foreground rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="e.g., AutoZone Pro"
             />
-            <p className="text-xs dark:text-gray-400 text-gray-500 mt-1">This will be your store's public name</p>
+            <p className="text-xs text-muted-foreground mt-1">This will be your store's public name</p>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold dark:text-gray-200 text-gray-900 mb-2">
+            <label className="block text-sm font-semibold text-foreground mb-2">
               Business Type *
             </label>
             <div className="grid grid-cols-1 gap-3">
@@ -673,7 +673,7 @@ const PartnerRegistrationForm: React.FC = () => {
                     }`}>
                       <type.icon className="w-5 h-5 dark:text-gray-300" />
                     </div>
-                    <span className="font-medium dark:text-gray-200">{type.label}</span>
+                    <span className="font-medium text-muted-foreground">{type.label}</span>
                   </div>
                 </button>
               ))}
@@ -681,7 +681,7 @@ const PartnerRegistrationForm: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold dark:text-gray-200 text-gray-900 mb-2">
+            <label className="block text-sm font-semibold text-foreground mb-2">
               Store Category *
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -707,45 +707,45 @@ const PartnerRegistrationForm: React.FC = () => {
 
         <div className="space-y-6">
           <div>
-            <label className="block text-sm font-semibold dark:text-gray-200 text-gray-900 mb-2">
+            <label className="block text-sm font-semibold text-foreground mb-2">
               Store Tagline
             </label>
             <input
               type="text"
               value={formData.storeTagline}
               onChange={(e) => setFormData({...formData, storeTagline: e.target.value})}
-              className="w-full px-4 py-3 dark:bg-gray-800 dark:border-gray-700 dark:text-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 bg-card border border-border text-foreground rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="e.g., Premium Auto Parts Since 2010"
               maxLength={60}
             />
             <div className="flex justify-between mt-1">
-              <p className="text-xs dark:text-gray-400 text-gray-500">Catchy phrase for your store</p>
+              <p className="text-xs text-muted-foreground">Catchy phrase for your store</p>
               <span className="text-xs dark:text-gray-500 text-gray-400">{formData.storeTagline.length}/60</span>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold dark:text-gray-200 text-gray-900 mb-2">
+            <label className="block text-sm font-semibold text-foreground mb-2">
               Store Description *
             </label>
             <textarea
               value={formData.storeDescription}
               onChange={(e) => setFormData({...formData, storeDescription: e.target.value})}
               rows={6}
-              className="w-full px-4 py-3 dark:bg-gray-800 dark:border-gray-700 dark:text-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 bg-card border border-border text-foreground rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Describe your store, your expertise, and what makes you unique..."
             />
-            <p className="text-xs dark:text-gray-400 text-gray-500 mt-1">Tell customers about your store (200-500 characters)</p>
+            <p className="text-xs text-muted-foreground mt-1">Tell customers about your store (200-500 characters)</p>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold dark:text-gray-200 text-gray-900 mb-2">
+            <label className="block text-sm font-semibold text-foreground mb-2">
               Year Established
             </label>
             <select
               value={formData.yearEstablished}
               onChange={(e) => setFormData({...formData, yearEstablished: e.target.value})}
-              className="w-full px-4 py-3 dark:bg-gray-800 dark:border-gray-700 dark:text-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 bg-card border border-border text-foreground rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               {Array.from({length: 50}, (_, i) => new Date().getFullYear() - i).map(year => (
                 <option key={year} value={year}>{year}</option>
@@ -764,8 +764,8 @@ const PartnerRegistrationForm: React.FC = () => {
         <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full mb-4">
           <Palette className="w-8 h-8 text-white" />
         </div>
-        <h2 className="text-2xl font-bold dark:text-white text-gray-900">Store Design</h2>
-        <p className="dark:text-gray-300 text-gray-600">Customize your store's appearance</p>
+        <h2 className="text-2xl font-bold text-foreground">Store Design</h2>
+        <p className="text-muted-foreground">Customize your store's appearance</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -814,7 +814,7 @@ const PartnerRegistrationForm: React.FC = () => {
                 <div className="inline-flex items-center justify-center w-20 h-20 dark:bg-gray-700 bg-gray-100 rounded-full mb-4">
                   <Upload className="w-8 h-8 dark:text-gray-400 text-gray-400" />
                 </div>
-                <h3 className="text-lg font-semibold dark:text-white text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-foreground mb-2">
                   Upload Store Logo
                 </h3>
                 <p className="dark:text-gray-400 text-gray-600 mb-4">
@@ -834,7 +834,7 @@ const PartnerRegistrationForm: React.FC = () => {
           </div>
 
           <div className="dark:bg-gray-800 dark:border-gray-700 bg-white border border-gray-200 rounded-xl p-6">
-            <h3 className="font-semibold dark:text-white text-gray-900 mb-4">Color Scheme</h3>
+            <h3 className="font-semibold text-foreground mb-4">Color Scheme</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm dark:text-gray-300 text-gray-700 mb-2">Brand Color</label>
@@ -849,8 +849,8 @@ const PartnerRegistrationForm: React.FC = () => {
                     <div className="absolute inset-0 rounded-lg dark:ring-gray-600 ring-2 ring-gray-200 pointer-events-none" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium dark:text-gray-200 text-gray-900">Primary Color</p>
-                    <p className="text-xs dark:text-gray-400 text-gray-500">Used for buttons, links, and highlights</p>
+                    <p className="text-sm font-medium text-foreground">Primary Color</p>
+                    <p className="text-xs text-muted-foreground">Used for buttons, links, and highlights</p>
                   </div>
                 </div>
               </div>
@@ -868,8 +868,8 @@ const PartnerRegistrationForm: React.FC = () => {
                     <div className="absolute inset-0 rounded-lg dark:ring-gray-600 ring-2 ring-gray-200 pointer-events-none" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium dark:text-gray-200 text-gray-900">Secondary Color</p>
-                    <p className="text-xs dark:text-gray-400 text-gray-500">Used for badges, alerts, and accents</p>
+                    <p className="text-sm font-medium text-foreground">Secondary Color</p>
+                    <p className="text-xs text-muted-foreground">Used for badges, alerts, and accents</p>
                   </div>
                 </div>
               </div>
@@ -922,7 +922,7 @@ const PartnerRegistrationForm: React.FC = () => {
                 <div className="inline-flex items-center justify-center w-20 h-20 dark:bg-gray-700 bg-gray-100 rounded-full mb-4">
                   <ImageIcon className="w-8 h-8 dark:text-gray-400 text-gray-400" />
                 </div>
-                <h3 className="text-lg font-semibold dark:text-white text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-foreground mb-2">
                   Upload Store Banner
                 </h3>
                 <p className="dark:text-gray-400 text-gray-600 mb-4">
@@ -939,7 +939,7 @@ const PartnerRegistrationForm: React.FC = () => {
           </div>
 
           <div className="dark:bg-gray-800 dark:border-gray-700 bg-white border border-gray-200 rounded-xl p-6">
-            <h3 className="font-semibold dark:text-white text-gray-900 mb-4">Preview</h3>
+            <h3 className="font-semibold text-foreground mb-4">Preview</h3>
             <div className="dark:border-gray-700 border border-gray-200 rounded-xl overflow-hidden">
               {/* Banner Preview */}
               <div className="h-32 bg-gradient-to-r from-blue-500 to-purple-600 relative">
@@ -976,7 +976,7 @@ const PartnerRegistrationForm: React.FC = () => {
               
               {/* Store Info Preview */}
               <div className="p-6 pt-8 dark:bg-gray-800">
-                <h4 className="text-xl font-bold dark:text-white text-gray-900 mb-1">
+                <h4 className="text-xl font-bold text-foreground mb-1">
                   {formData.storeName || "Your Store Name"}
                 </h4>
                 <p className="dark:text-gray-400 text-gray-600 mb-4">
@@ -1008,14 +1008,14 @@ const PartnerRegistrationForm: React.FC = () => {
         <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full mb-4">
           <User className="w-8 h-8 text-white" />
         </div>
-        <h2 className="text-2xl font-bold dark:text-white text-gray-900">Contact Details</h2>
-        <p className="dark:text-gray-300 text-gray-600">How customers can reach you</p>
+        <h2 className="text-2xl font-bold text-foreground">Contact Details</h2>
+        <p className="text-muted-foreground">How customers can reach you</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-6">
           <div>
-            <label className="block text-sm font-semibold dark:text-gray-200 text-gray-900 mb-2">
+            <label className="block text-sm font-semibold text-foreground mb-2">
               Contact Email *
             </label>
             <div className="relative">
@@ -1024,15 +1024,15 @@ const PartnerRegistrationForm: React.FC = () => {
                 type="email"
                 value={formData.contactEmail}
                 onChange={(e) => setFormData({...formData, contactEmail: e.target.value})}
-                className="pl-10 w-full px-4 py-3 dark:bg-gray-800 dark:border-gray-700 dark:text-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="pl-10 w-full px-4 py-3 bg-card border border-border text-foreground rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="you@example.com"
               />
             </div>
-            <p className="text-xs dark:text-gray-400 text-gray-500 mt-1">For business communications</p>
+            <p className="text-xs text-muted-foreground mt-1">For business communications</p>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold dark:text-gray-200 text-gray-900 mb-2">
+            <label className="block text-sm font-semibold text-foreground mb-2">
               Contact Phone *
             </label>
             <div className="relative">
@@ -1041,7 +1041,7 @@ const PartnerRegistrationForm: React.FC = () => {
                 type="tel"
                 value={formData.contactPhone}
                 onChange={(e) => setFormData({...formData, contactPhone: e.target.value})}
-                className="pl-10 w-full px-4 py-3 dark:bg-gray-800 dark:border-gray-700 dark:text-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="pl-10 w-full px-4 py-3 bg-card border border-border text-foreground rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="+1 (555) 123-4567"
               />
             </div>
@@ -1050,7 +1050,7 @@ const PartnerRegistrationForm: React.FC = () => {
 
         <div className="space-y-6">
           <div>
-            <label className="block text-sm font-semibold dark:text-gray-200 text-gray-900 mb-4">
+            <label className="block text-sm font-semibold text-foreground mb-4">
               Social Media Links (Optional)
             </label>
             <div className="space-y-4">
@@ -1062,7 +1062,7 @@ const PartnerRegistrationForm: React.FC = () => {
                   type="text"
                   value={formData.socialFacebook}
                   onChange={(e) => setFormData({...formData, socialFacebook: e.target.value})}
-                  className="pl-10 w-full px-4 py-3 dark:bg-gray-800 dark:border-gray-700 dark:text-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="pl-10 w-full px-4 py-3 bg-card border border-border text-foreground rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="facebook.com/yourstore"
                 />
               </div>
@@ -1075,7 +1075,7 @@ const PartnerRegistrationForm: React.FC = () => {
                   type="text"
                   value={formData.socialInstagram}
                   onChange={(e) => setFormData({...formData, socialInstagram: e.target.value})}
-                  className="pl-10 w-full px-4 py-3 dark:bg-gray-800 dark:border-gray-700 dark:text-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="pl-10 w-full px-4 py-3 bg-card border border-border text-foreground rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="instagram.com/yourstore"
                 />
               </div>
@@ -1088,7 +1088,7 @@ const PartnerRegistrationForm: React.FC = () => {
                   type="text"
                   value={formData.socialLinkedIn}
                   onChange={(e) => setFormData({...formData, socialLinkedIn: e.target.value})}
-                  className="pl-10 w-full px-4 py-3 dark:bg-gray-800 dark:border-gray-700 dark:text-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="pl-10 w-full px-4 py-3 bg-card border border-border text-foreground rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="linkedin.com/company/yourstore"
                 />
               </div>
@@ -1096,7 +1096,7 @@ const PartnerRegistrationForm: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold dark:text-gray-200 text-gray-900 mb-2">
+            <label className="block text-sm font-semibold text-foreground mb-2">
               Location *
             </label>
             <div className="grid grid-cols-2 gap-4">
@@ -1105,7 +1105,7 @@ const PartnerRegistrationForm: React.FC = () => {
                   type="text"
                   value={formData.country}
                   onChange={(e) => setFormData({...formData, country: e.target.value})}
-                  className="w-full px-4 py-3 dark:bg-gray-800 dark:border-gray-700 dark:text-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-3 bg-card border border-border text-foreground rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Country"
                 />
               </div>
@@ -1114,7 +1114,7 @@ const PartnerRegistrationForm: React.FC = () => {
                   type="text"
                   value={formData.city}
                   onChange={(e) => setFormData({...formData, city: e.target.value})}
-                  className="w-full px-4 py-3 dark:bg-gray-800 dark:border-gray-700 dark:text-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-3 bg-card border border-border text-foreground rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="City"
                 />
               </div>
@@ -1132,8 +1132,8 @@ const PartnerRegistrationForm: React.FC = () => {
         <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-full mb-4">
           <Gift className="w-8 h-8 text-white" />
         </div>
-        <h2 className="text-2xl font-bold dark:text-white text-gray-900">Invitation Code</h2>
-        <p className="dark:text-gray-300 text-gray-600">Join through an existing partner</p>
+        <h2 className="text-2xl font-bold text-foreground">Invitation Code</h2>
+        <p className="text-muted-foreground">Join through an existing partner</p>
       </div>
 
       <div className="max-w-2xl mx-auto">
@@ -1156,7 +1156,7 @@ const PartnerRegistrationForm: React.FC = () => {
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-xl font-bold dark:text-white text-gray-900">
+                  <h3 className="text-xl font-bold text-foreground">
                     Invited by {invitationValidation.referrerName}
                   </h3>
                   <span className="px-3 py-1 dark:bg-green-900/30 dark:text-green-300 bg-green-100 text-green-800 rounded-full text-sm font-medium">
@@ -1172,7 +1172,7 @@ const PartnerRegistrationForm: React.FC = () => {
                     <div key={index} className="dark:bg-gray-700/50 dark:border-gray-600 bg-white border border-green-200 rounded-lg p-3">
                       <div className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-green-600" />
-                        <span className="text-sm font-medium dark:text-gray-200 text-gray-900">{benefit}</span>
+                        <span className="text-sm font-medium text-foreground">{benefit}</span>
                       </div>
                     </div>
                   ))}
@@ -1184,7 +1184,7 @@ const PartnerRegistrationForm: React.FC = () => {
 
         {/* Code Input */}
         <div className="dark:bg-gray-800 dark:border-gray-700 bg-white border border-gray-200 rounded-2xl p-8">
-          <h3 className="text-lg font-semibold dark:text-white text-gray-900 mb-2">
+          <h3 className="text-lg font-semibold text-foreground mb-2">
             Enter Invitation Code *
           </h3>
           <p className="dark:text-gray-400 text-gray-600 mb-6">
@@ -1224,7 +1224,7 @@ const PartnerRegistrationForm: React.FC = () => {
 
           {/* Instructions */}
           <div className="mt-8 p-6 dark:bg-blue-900/20 dark:border-blue-800/30 bg-blue-50 border border-blue-200 rounded-xl">
-            <h4 className="font-semibold dark:text-white text-gray-900 mb-3">How to get an invitation code:</h4>
+            <h4 className="font-semibold text-foreground mb-3">How to get an invitation code:</h4>
             <ul className="space-y-2">
               <li className="flex items-start gap-2">
                 <div className="w-6 h-6 dark:bg-blue-900/40 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -1258,14 +1258,14 @@ const PartnerRegistrationForm: React.FC = () => {
         <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-full mb-4">
           <FileCheck className="w-8 h-8 text-white" />
         </div>
-        <h2 className="text-2xl font-bold dark:text-white text-gray-900">Review & Submit</h2>
-        <p className="dark:text-gray-300 text-gray-600">Final check before submitting your application</p>
+        <h2 className="text-2xl font-bold text-foreground">Review & Submit</h2>
+        <p className="text-muted-foreground">Final check before submitting your application</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Summary Card */}
         <div className="dark:bg-gray-800 dark:border-gray-700 bg-white border border-gray-200 rounded-2xl p-6">
-          <h3 className="text-lg font-bold dark:text-white text-gray-900 mb-6">Application Summary</h3>
+          <h3 className="text-lg font-bold text-foreground mb-6">Application Summary</h3>
           
           <div className="space-y-6">
             {/* Store Info */}
@@ -1356,7 +1356,7 @@ const PartnerRegistrationForm: React.FC = () => {
         {/* Terms & Agreements */}
         <div className="space-y-6">
           <div className="dark:bg-gray-800 dark:border-gray-700 bg-white border border-gray-200 rounded-2xl p-6">
-            <h3 className="text-lg font-bold dark:text-white text-gray-900 mb-6">Terms & Agreements</h3>
+            <h3 className="text-lg font-bold text-foreground mb-6">Terms & Agreements</h3>
             
             <div className="space-y-4">
               <div className="flex items-start gap-3 p-4 dark:bg-gray-700/50 bg-gray-50 rounded-lg">
@@ -1368,7 +1368,7 @@ const PartnerRegistrationForm: React.FC = () => {
                   className="mt-1 dark:accent-blue-500"
                 />
                 <div>
-                  <label htmlFor="agreeToTerms" className="font-medium dark:text-gray-200 text-gray-900 cursor-pointer">
+                  <label htmlFor="agreeToTerms" className="font-medium text-foreground cursor-pointer">
                     AutoVault Partner Agreement
                   </label>
                   <p className="text-sm dark:text-gray-400 text-gray-600 mt-1">
@@ -1386,7 +1386,7 @@ const PartnerRegistrationForm: React.FC = () => {
                   className="mt-1 dark:accent-blue-500"
                 />
                 <div>
-                  <label htmlFor="agreeToPrivacy" className="font-medium dark:text-gray-200 text-gray-900 cursor-pointer">
+                  <label htmlFor="agreeToPrivacy" className="font-medium text-foreground cursor-pointer">
                     Privacy Policy & Data Usage
                   </label>
                   <p className="text-sm dark:text-gray-400 text-gray-600 mt-1">
@@ -1404,7 +1404,7 @@ const PartnerRegistrationForm: React.FC = () => {
                   className="mt-1 dark:accent-blue-500"
                 />
                 <div>
-                  <label htmlFor="agreeToCommission" className="font-medium dark:text-gray-200 text-gray-900 cursor-pointer">
+                  <label htmlFor="agreeToCommission" className="font-medium text-foreground cursor-pointer">
                     Commission Structure
                   </label>
                   <p className="text-sm dark:text-gray-400 text-gray-600 mt-1">
@@ -1422,7 +1422,7 @@ const PartnerRegistrationForm: React.FC = () => {
                   className="mt-1 dark:accent-blue-500"
                 />
                 <div>
-                  <label htmlFor="receiveUpdates" className="font-medium dark:text-gray-200 text-gray-900 cursor-pointer">
+                  <label htmlFor="receiveUpdates" className="font-medium text-foreground cursor-pointer">
                     Marketing Communications
                   </label>
                   <p className="text-sm dark:text-gray-400 text-gray-600 mt-1">
@@ -1435,14 +1435,14 @@ const PartnerRegistrationForm: React.FC = () => {
 
           {/* Benefits Card */}
           <div className="dark:bg-gray-800 dark:border-blue-800/30 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6">
-            <h3 className="text-lg font-bold dark:text-white text-gray-900 mb-4">What happens next?</h3>
+            <h3 className="text-lg font-bold text-foreground mb-4">What happens next?</h3>
             <ul className="space-y-3">
               <li className="flex items-center gap-3">
                 <div className="w-8 h-8 dark:bg-blue-900/40 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
                   <Clock className="w-4 h-4 dark:text-blue-400 text-blue-600" />
                 </div>
                 <div>
-                  <p className="font-medium dark:text-white text-gray-900">Application Review</p>
+                  <p className="font-medium text-foreground">Application Review</p>
                   <p className="text-sm dark:text-gray-400 text-gray-600">We'll review your application within 48 hours</p>
                 </div>
               </li>
@@ -1451,7 +1451,7 @@ const PartnerRegistrationForm: React.FC = () => {
                   <Store className="w-4 h-4 dark:text-blue-400 text-blue-600" />
                 </div>
                 <div>
-                  <p className="font-medium dark:text-white text-gray-900">Store Setup</p>
+                  <p className="font-medium text-foreground">Store Setup</p>
                   <p className="text-sm dark:text-gray-400 text-gray-600">Your store will be created with a unique Store ID</p>
                 </div>
               </li>
@@ -1460,7 +1460,7 @@ const PartnerRegistrationForm: React.FC = () => {
                   <TrendingUp className="w-4 h-4 dark:text-blue-400 text-blue-600" />
                 </div>
                 <div>
-                  <p className="font-medium dark:text-white text-gray-900">Start Selling</p>
+                  <p className="font-medium text-foreground">Start Selling</p>
                   <p className="text-sm dark:text-gray-400 text-gray-600">Access our catalog and start selling immediately</p>
                 </div>
               </li>
@@ -1480,11 +1480,11 @@ const PartnerRegistrationForm: React.FC = () => {
             <CheckCircle className="w-12 h-12 text-white" />
           </div>
           
-          <h1 className="text-4xl font-bold dark:text-white text-gray-900 mb-4">
+          <h1 className="text-4xl font-bold text-foreground mb-4">
             Application Submitted!
           </h1>
           
-          <p className="text-xl dark:text-gray-300 text-gray-600 mb-8 max-w-md mx-auto">
+          <p className="text-xl text-muted-foreground mb-8 max-w-md mx-auto">
             Your partner application has been received. Our team will review it and contact you within 48 hours.
           </p>
 
@@ -1494,7 +1494,7 @@ const PartnerRegistrationForm: React.FC = () => {
                 <Store className="w-8 h-8 dark:text-blue-400 text-blue-600" />
               </div>
               <p className="text-sm font-medium dark:text-blue-300 text-blue-800 mb-2">Your Store ID</p>
-              <div className="text-2xl font-bold dark:text-white text-gray-900 font-mono tracking-wider">
+              <div className="text-2xl font-bold text-foreground font-mono tracking-wider">
                 {StoreIdService.formatStoreId(generatedStoreId)}
               </div>
               <p className="text-sm dark:text-blue-400 text-blue-600 mt-2">
@@ -1545,12 +1545,12 @@ const PartnerRegistrationForm: React.FC = () => {
                   </div>
                   <div className="text-left hidden md:block">
                     <p className={`text-sm font-medium ${
-                      currentStep >= step.id ? 'dark:text-white text-gray-900' : 'dark:text-gray-400 text-gray-500'
+                      currentStep >= step.id ? 'text-foreground' : 'text-muted-foreground'
                     }`}>
                       Step {step.id}
                     </p>
                     <p className={`text-xs ${
-                      currentStep >= step.id ? 'dark:text-gray-300 text-gray-600' : 'dark:text-gray-500 text-gray-400'
+                      currentStep >= step.id ? 'text-muted-foreground' : 'dark:text-gray-500 text-gray-400'
                     }`}>
                       {step.title}
                     </p>
@@ -1561,7 +1561,7 @@ const PartnerRegistrationForm: React.FC = () => {
 
             {/* Step Counter */}
             <div className="text-right">
-              <p className="text-sm font-medium dark:text-white text-gray-900">
+              <p className="text-sm font-medium text-foreground">
                 Step {currentStep} of {WIZARD_STEPS.length}
               </p>
               <div className="w-32 h-2 dark:bg-gray-700 bg-gray-200 rounded-full overflow-hidden mt-1">
