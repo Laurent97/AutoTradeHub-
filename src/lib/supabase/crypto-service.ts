@@ -16,6 +16,20 @@ export const cryptoService = {
   async getActiveCryptoAddresses(): Promise<{ data: CryptoAddress[]; error: any }> {
     try {
       console.log('Fetching crypto addresses from database...');
+      
+      // First check if table exists
+      const { data: tableCheck, error: tableError } = await supabase
+        .from('crypto_addresses')
+        .select('count')
+        .limit(1);
+      
+      if (tableError) {
+        console.error('Table does not exist or access error:', tableError);
+        return { data: [], error: tableError };
+      }
+      
+      console.log('Table exists, fetching addresses...');
+      
       const { data, error } = await supabase
         .from('crypto_addresses')
         .select('*')
@@ -28,6 +42,7 @@ export const cryptoService = {
       }
 
       console.log('Crypto addresses fetched successfully:', data?.length || 0, 'addresses');
+      console.log('Fetched addresses:', data);
       return { data: data || [], error: null };
     } catch (error) {
       console.error('Error fetching crypto addresses:', error);
@@ -87,6 +102,18 @@ export const cryptoService = {
   async testConnection(): Promise<{ success: boolean; message: string }> {
     try {
       console.log('Testing crypto database connection...');
+      
+      // Check if table exists first
+      const { data: tableCheck, error: tableError } = await supabase
+        .from('crypto_addresses')
+        .select('count')
+        .limit(1);
+
+      if (tableError) {
+        console.error('Table does not exist:', tableError);
+        return { success: false, message: `Table crypto_addresses does not exist: ${tableError.message}` };
+      }
+      
       const { data, error } = await supabase
         .from('crypto_addresses')
         .select('count')
@@ -99,7 +126,19 @@ export const cryptoService = {
 
       const count = data?.[0]?.count || 0;
       console.log('Database connection test successful. Active crypto addresses:', count);
-      return { success: true, message: `Connected successfully. ${count} active crypto addresses found.` };
+      
+      // Get actual addresses for debugging
+      const { data: addresses } = await supabase
+        .from('crypto_addresses')
+        .select('crypto_type, address, is_active')
+        .eq('is_active', true);
+      
+      console.log('Available addresses:', addresses);
+      
+      return { 
+        success: true, 
+        message: `Connected successfully. ${count} active crypto addresses found: ${addresses?.map(a => a.crypto_type).join(', ')}` 
+      };
     } catch (error) {
       console.error('Database connection test error:', error);
       return { success: false, message: `Connection test failed: ${error.message}` };
