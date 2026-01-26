@@ -118,7 +118,7 @@ const BecomePartner: React.FC = () => {
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {benefits.map((benefit, index) => (
-              <Card key={index} className="card-hover border-0 shadow-lg dark:bg-gray-800 dark:border-gray-700">
+              <Card key={index} className="card-hover border-0 shadow-lg dark:bg-gray-800 dark:border-gray-700 hover:shadow-xl transition-all duration-300">
                 <CardHeader className="text-center pb-4">
                   <div className={`w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4 mx-auto`}>
                     <benefit.icon className={`w-6 h-6 ${benefit.color}`} />
@@ -128,7 +128,7 @@ const BecomePartner: React.FC = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="text-center">
-                  <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
                     {benefit.description}
                   </p>
                 </CardContent>
