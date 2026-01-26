@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/lib/supabase/client";
+import { usePartnerProfiles } from "@/hooks/useRealtimeSubscription";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -319,135 +320,19 @@ const ShopCard = ({ shop }: { shop: PartnerShop }) => {
 };
 
 export default function Manufacturers() {
-  const [shops, setShops] = useState<PartnerShop[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const { data: shops, loading, error, refresh, lastUpdate } = usePartnerProfiles();
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [countryFilter, setCountryFilter] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  useEffect(() => {
-    loadShops();
-    
-    // Set up real-time subscription for partner profiles
-    const subscription = supabase
-      .channel('partner_profiles_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*', // Listen to all changes (INSERT, UPDATE, DELETE)
-          schema: 'public',
-          table: 'partner_profiles'
-        },
-        (payload) => {
-          console.log('Partner profiles changed:', payload);
-          setLastUpdate(new Date());
-          // Reload shops when there are changes
-          loadShops();
-        }
-      )
-      .subscribe();
-
-    // Cleanup subscription on unmount
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  const loadShops = async () => {
-    setLoading(true);
-    try {
-      let query = supabase
-        .from('partner_profiles')
-        .select(`
-          *,
-          users (
-            email,
-            full_name
-          )
-        `)
-        .not('store_name', 'is', null); // Only get records with store names
-
-      // Apply filters
-      if (countryFilter !== "all") {
-        query = query.eq('country', countryFilter);
-      }
-
-      // Apply sorting
-      switch (sortBy) {
-        case "rating":
-          query = query.order('rating', { ascending: false });
-          break;
-        case "newest":
-          query = query.order('created_at', { ascending: false });
-          break;
-        case "earnings":
-          query = query.order('total_earnings', { ascending: false });
-          break;
-        case "orders":
-          query = query.order('total_orders', { ascending: false });
-          break;
-        default:
-          query = query.order('store_name', { ascending: true });
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('Database error:', error);
-        throw error;
-      }
-      
-      console.log('Loaded shops:', data?.length || 0);
-      console.log('Shop data:', data);
-      setShops(data || []);
-      setLastUpdate(new Date());
-    } catch (error) {
-      console.error('Error loading shops:', error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
-  const handleRefresh = () => {
-    setRefreshing(true);
-    loadShops();
-  };
-
-  const loadStats = async () => {
-    try {
-      const { data: shopsData } = await supabase
-        .from('partner_profiles')
-        .select('partner_status')
-        .not('store_name', 'is', null);
-
-      const { data: productsData } = await supabase
-        .from('partner_products')
-        .select('id');
-
-      const totalShops = shopsData?.length || 0;
-      const activeShops = shopsData?.filter(s => s.partner_status === 'approved').length || 0;
-      const totalProducts = productsData?.length || 0;
-
-      console.log('Stats:', { totalShops, activeShops, totalProducts });
-      
-      // Stats are logged but not set since setStats is not defined
-      // This function can be used for debugging purposes
-    } catch (error) {
-      console.error('Error loading stats:', error);
-    }
-  };
-
-  const filteredShops = shops.filter(shop => {
+  const filteredShops = (shops || []).filter(shop => {
     const searchLower = searchTerm.toLowerCase();
     const searchWords = searchLower.split(' ').filter(word => word.length > 0);
     
     // Debug logging for first few shops
-    if (shops.indexOf(shop) < 3) {
+    if ((shops || []).indexOf(shop) < 3) {
       console.log('Filtering shop:', {
         name: shop.store_name,
         description: shop.description,
@@ -576,12 +461,12 @@ export default function Manufacturers() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleRefresh}
-                disabled={refreshing || loading}
+                onClick={refresh}
+                disabled={loading}
                 className="flex items-center gap-2"
               >
-                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-                {refreshing ? 'Refreshing...' : 'Refresh'}
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                {loading ? 'Refreshing...' : 'Refresh'}
               </Button>
             </div>
           </div>
