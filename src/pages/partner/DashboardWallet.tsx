@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { walletService } from '../../lib/supabase/wallet-service';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import { useRealtimeSubscription } from '../../hooks/useRealtimeSubscription';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { 
   Wallet, 
   TrendingUp, 
@@ -15,7 +18,15 @@ import {
   Upload,
   History,
   AlertCircle,
-  Clock
+  Clock,
+  CreditCard,
+  Bitcoin,
+  Mail,
+  Shield,
+  Zap,
+  ChevronRight,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 
 interface WalletBalance {
@@ -43,9 +54,34 @@ export default function DashboardWallet() {
   const { user, userProfile } = useAuth();
   const navigate = useNavigate();
   
-  const [wallet, setWallet] = useState<WalletBalance | null>(null);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Real-time wallet data
+  const { data: walletData, loading: walletLoading, refresh: refreshWallet } = useRealtimeSubscription(
+    async () => {
+      if (!user) return [];
+      const { data } = await walletService.getBalance(user.id);
+      return data ? [data] : [];
+    },
+    {
+      table: 'wallet_balances',
+      event: '*',
+      filter: `user_id=eq.${user?.id}`
+    }
+  );
+
+  const { data: transactions, loading: transactionsLoading, refresh: refreshTransactions } = useRealtimeSubscription(
+    async () => {
+      if (!user) return [];
+      const { data } = await walletService.getTransactions(user.id, 20);
+      return data || [];
+    },
+    {
+      table: 'wallet_transactions',
+      event: '*',
+      filter: `user_id=eq.${user?.id}`
+    }
+  );
+  
+  const [showBalance, setShowBalance] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState({
     totalEarnings: 0,
@@ -56,63 +92,48 @@ export default function DashboardWallet() {
     transactionCount: 0
   });
 
-  // Check for dark mode
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  
-  useEffect(() => {
-    const htmlElement = document.documentElement;
-    setIsDarkMode(htmlElement.classList.contains('dark'));
-  }, []);
+  const wallet = walletData?.[0] || null;
 
   useEffect(() => {
-    loadWalletData();
-  }, [user, userProfile]);
+    if (transactions && transactions.length > 0) {
+      const totalEarnings = transactions
+        .filter(t => (t.type === 'commission' || t.type === 'bonus') && t.status === 'completed')
+        .reduce((sum, t) => sum + t.amount, 0);
+      
+      const totalWithdrawn = transactions
+        .filter(t => t.type === 'withdrawal' && t.status === 'completed')
+        .reduce((sum, t) => sum + t.amount, 0);
+      
+      const totalDeposits = transactions
+        .filter(t => t.type === 'deposit' && t.status === 'completed')
+        .reduce((sum, t) => sum + t.amount, 0);
+      
+      const pendingBalance = transactions
+        .filter(t => t.status === 'pending')
+        .reduce((sum, t) => sum + t.amount, 0);
 
-  const loadWalletData = async () => {
-    if (!user) return;
-    
-    setLoading(true);
-    try {
-      // Load wallet balance
-      const { data: walletData } = await walletService.getBalance(user.id);
-      setWallet(walletData);
-
-      // Load recent transactions
-      const { data: transactionsData } = await walletService.getTransactions(user.id, 20);
-      setTransactions(transactionsData);
-
-      // Load wallet stats
-      const { data: statsData } = await walletService.getStats(user.id);
-      console.log('Wallet Dashboard - Wallet Stats:', statsData);
-      console.log('Wallet Dashboard - Available Balance:', statsData?.availableBalance);
       setStats({
-        totalEarnings: statsData.totalEarnings,
-        totalWithdrawn: statsData.totalWithdrawals,
-        totalDeposits: statsData.totalDeposits,
-        pendingBalance: statsData.pendingBalance,
-        availableBalance: statsData.availableBalance,
-        transactionCount: statsData.transactionCount
+        totalEarnings,
+        totalWithdrawn,
+        totalDeposits,
+        pendingBalance,
+        availableBalance: wallet?.balance || 0,
+        transactionCount: transactions.length
       });
-    } catch (error) {
-      console.error('Error loading wallet data:', error);
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [transactions, wallet]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await loadWalletData();
+    await Promise.all([refreshWallet(), refreshTransactions()]);
     setRefreshing(false);
   };
 
   const handleDeposit = () => {
-    // Navigate to wallet deposit page
     navigate('/partner/dashboard/wallet/deposit');
   };
 
   const handleWithdraw = () => {
-    // Navigate to withdrawal page (can be implemented later)
     navigate('/payment/withdraw');
   };
 
@@ -133,316 +154,317 @@ export default function DashboardWallet() {
     });
   };
 
+  const getPaymentMethodInfo = (method: string) => {
+    switch (method?.toLowerCase()) {
+      case 'stripe':
+        return { icon: <CreditCard className="w-4 h-4" />, name: 'Card', color: 'text-blue-600' };
+      case 'paypal':
+        return { icon: <Mail className="w-4 h-4" />, name: 'PayPal', color: 'text-blue-500' };
+      case 'crypto':
+        return { icon: <Bitcoin className="w-4 h-4" />, name: 'Crypto', color: 'text-orange-500' };
+      case 'wallet':
+        return { icon: <Wallet className="w-4 h-4" />, name: 'Wallet', color: 'text-green-600' };
+      default:
+        return { icon: <DollarSign className="w-4 h-4" />, name: method || 'Unknown', color: 'text-gray-600' };
+    }
+  };
+
   const getTransactionIcon = (type: string) => {
-    const iconClass = isDarkMode ? "w-4 h-4" : "w-4 h-4";
     switch (type) {
       case 'deposit':
-        return <ArrowUpRight className={`${iconClass} ${isDarkMode ? 'text-green-400' : 'text-green-600'}`} />;
+        return <ArrowUpRight className="w-4 h-4 text-green-600" />;
       case 'withdrawal':
-        return <ArrowDownRight className={`${iconClass} ${isDarkMode ? 'text-red-400' : 'text-red-600'}`} />;
+        return <ArrowDownRight className="w-4 h-4 text-red-600" />;
       case 'order_payment':
-        return <DollarSign className={`${iconClass} ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />;
+        return <DollarSign className="w-4 h-4 text-blue-600" />;
       case 'order_refund':
-        return <RefreshCw className={`${iconClass} ${isDarkMode ? 'text-orange-400' : 'text-orange-600'}`} />;
+        return <RefreshCw className="w-4 h-4 text-orange-600" />;
+      case 'commission':
+        return <TrendingUp className="w-4 h-4 text-purple-600" />;
+      case 'bonus':
+        return <Zap className="w-4 h-4 text-yellow-600" />;
       default:
-        return <Wallet className={`${iconClass} ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} />;
+        return <Wallet className="w-4 h-4 text-gray-600" />;
     }
   };
 
   const getStatusColor = (status: string) => {
-    if (isDarkMode) {
-      switch (status) {
-        case 'completed':
-          return 'text-green-400 bg-green-900/30';
-        case 'pending':
-          return 'text-yellow-400 bg-yellow-900/30';
-        case 'failed':
-          return 'text-red-400 bg-red-900/30';
-        default:
-          return 'text-gray-400 bg-gray-900/30';
-      }
-    } else {
-      switch (status) {
-        case 'completed':
-          return 'text-green-600 bg-green-100';
-        case 'pending':
-          return 'text-yellow-600 bg-yellow-100';
-        case 'failed':
-          return 'text-red-600 bg-red-100';
-        default:
-          return 'text-gray-600 bg-gray-100';
-      }
+    switch (status) {
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'failed':
+        return 'bg-red-100 text-red-800';
+      case 'cancelled':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
+  const loading = walletLoading || transactionsLoading;
+
   if (loading) {
     return (
-      <div className={`flex justify-center items-center py-16 ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
-        <LoadingSpinner />
+      <div className="min-h-screen bg-background">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className={`rounded-lg shadow-lg ${isDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}>
-      <div className="p-6">
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Wallet</h1>
-          <p className={`mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Manage your earnings and payments</p>
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Wallet Dashboard</h1>
+            <p className="text-muted-foreground">Manage your earnings and transactions</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowBalance(!showBalance)}
+              className="flex items-center gap-2"
+            >
+              {showBalance ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {showBalance ? 'Hide' : 'Show'} Balance
+            </Button>
+          </div>
         </div>
 
         {/* Main Balance Card */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-700 dark:to-purple-700 rounded-xl p-8 text-white mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-3">
-              <Wallet className="w-8 h-8" />
+        <Card className="mb-8 bg-gradient-to-r from-primary to-primary/90 text-primary-foreground">
+          <CardHeader>
+            <div className="flex justify-between items-start">
               <div>
-                <h2 className="text-2xl font-semibold">Available Balance</h2>
-                <p className="text-blue-100 dark:text-blue-200/80">Automatically used for order payments</p>
+                <CardTitle className="text-2xl font-semibold mb-2">Available Balance</CardTitle>
+                <p className="text-primary-foreground/80">Your current wallet balance</p>
               </div>
+              <Wallet className="w-8 h-8 text-primary-foreground/50" />
             </div>
-            <button
-              onClick={handleRefresh}
-              className="p-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors"
-              disabled={refreshing}
-              title="Refresh wallet data"
-            >
-              <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
-            </button>
-          </div>
-          
-          <div className="text-4xl font-bold mb-6">
-            {formatCurrency(stats.availableBalance || 0)}
-          </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-4xl font-bold mb-6">
+              {showBalance ? formatCurrency(wallet?.balance || 0) : '••••••'}
+            </div>
+            <div className="flex flex-wrap gap-4">
+              <Button 
+                onClick={handleDeposit}
+                className="bg-white text-primary hover:bg-gray-100 flex items-center gap-2"
+              >
+                <Upload className="w-4 h-4" />
+                Deposit Funds
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={handleWithdraw}
+                className="border-white/20 text-primary-foreground hover:bg-white/10 flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Withdraw
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white/10 dark:bg-white/5 rounded-lg p-4">
-              <p className="text-blue-100 dark:text-blue-200/80 text-sm">Pending Balance</p>
-              <p className="text-xl font-semibold">{formatCurrency(stats.pendingBalance || 0)}</p>
-            </div>
-            <div className="bg-white/10 dark:bg-white/5 rounded-lg p-4">
-              <p className="text-blue-100 dark:text-blue-200/80 text-sm">Total Earnings</p>
-              <p className="text-xl font-semibold">{formatCurrency(stats.totalEarnings || 0)}</p>
-            </div>
-            <div className="bg-white/10 dark:bg-white/5 rounded-lg p-4">
-              <p className="text-blue-100 dark:text-blue-200/80 text-sm">Last Updated</p>
-              <p className="text-xl font-semibold">
-                {wallet?.updated_at ? formatDate(wallet.updated_at) : 'Never'}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <button
-            onClick={handleDeposit}
-            className={`rounded-xl p-6 border transition-all group ${
-              isDarkMode 
-                ? 'bg-gray-800 border-gray-700 hover:border-green-500 hover:shadow-lg hover:shadow-green-500/10' 
-                : 'bg-white border-gray-200 hover:border-green-500 hover:shadow-lg'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className={`p-3 rounded-lg transition-colors ${
-                  isDarkMode 
-                    ? 'bg-green-900/30 group-hover:bg-green-900/50' 
-                    : 'bg-green-100 group-hover:bg-green-200'
-                }`}>
-                  <Download className={`w-6 h-6 ${isDarkMode ? 'text-green-400' : 'text-green-600'}`} />
-                </div>
-                <div className="text-left">
-                  <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Add Funds</h3>
-                  <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Deposit money to your wallet</p>
-                </div>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Total Earnings</CardTitle>
+                <TrendingUp className="w-4 h-4 text-green-600" />
               </div>
-              <ArrowUpRight className={`w-5 h-5 transition-colors ${
-                isDarkMode 
-                  ? 'text-gray-500 group-hover:text-green-400' 
-                  : 'text-gray-400 group-hover:text-green-600'
-              }`} />
-            </div>
-          </button>
-
-          <button
-            onClick={handleWithdraw}
-            className={`rounded-xl p-6 border transition-all group ${
-              isDarkMode 
-                ? 'bg-gray-800 border-gray-700 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/10' 
-                : 'bg-white border-gray-200 hover:border-blue-500 hover:shadow-lg'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className={`p-3 rounded-lg transition-colors ${
-                  isDarkMode 
-                    ? 'bg-blue-900/30 group-hover:bg-blue-900/50' 
-                    : 'bg-blue-100 group-hover:bg-blue-200'
-                }`}>
-                  <Upload className={`w-6 h-6 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
-                </div>
-                <div className="text-left">
-                  <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Withdraw Funds</h3>
-                  <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Transfer money to your account</p>
-                </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">
+                {formatCurrency(stats.totalEarnings)}
               </div>
-              <ArrowUpRight className={`w-5 h-5 transition-colors ${
-                isDarkMode 
-                  ? 'text-gray-500 group-hover:text-blue-400' 
-                  : 'text-gray-400 group-hover:text-blue-600'
-              }`} />
-            </div>
-          </button>
-        </div>
+            </CardContent>
+          </Card>
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className={`rounded-lg p-4 border ${
-            isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          }`}>
-            <div className="flex items-center justify-between mb-2">
-              <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Total Earnings</span>
-              <TrendingUp className={`w-4 h-4 ${isDarkMode ? 'text-green-400' : 'text-green-600'}`} />
-            </div>
-            <p className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-              {formatCurrency(stats.totalEarnings)}
-            </p>
-          </div>
-          
-          <div className={`rounded-lg p-4 border ${
-            isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          }`}>
-            <div className="flex items-center justify-between mb-2">
-              <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Available</span>
-              <Wallet className={`w-4 h-4 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
-            </div>
-            <p className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-              {formatCurrency(stats.availableBalance)}
-            </p>
-          </div>
-          
-          <div className={`rounded-lg p-4 border ${
-            isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          }`}>
-            <div className="flex items-center justify-between mb-2">
-              <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Pending</span>
-              <Clock className={`w-4 h-4 ${isDarkMode ? 'text-yellow-400' : 'text-yellow-600'}`} />
-            </div>
-            <p className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-              {formatCurrency(stats.pendingBalance)}
-            </p>
-          </div>
-          
-          <div className={`rounded-lg p-4 border ${
-            isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          }`}>
-            <div className="flex items-center justify-between mb-2">
-              <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Withdrawn</span>
-              <TrendingDown className={`w-4 h-4 ${isDarkMode ? 'text-red-400' : 'text-red-600'}`} />
-            </div>
-            <p className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-              {formatCurrency(stats.totalWithdrawn)}
-            </p>
-          </div>
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Total Withdrawn</CardTitle>
+                <ArrowDownRight className="w-4 h-4 text-red-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">
+                {formatCurrency(stats.totalWithdrawn)}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Pending Balance</CardTitle>
+                <Clock className="w-4 h-4 text-yellow-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">
+                {formatCurrency(stats.pendingBalance)}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Transactions</CardTitle>
+                <History className="w-4 h-4 text-blue-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">
+                {stats.transactionCount}
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Recent Transactions */}
-        <div className={`rounded-xl border ${
-          isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-        }`}>
-          <div className={`p-6 border-b ${
-            isDarkMode ? 'border-gray-700' : 'border-gray-200'
-          }`}>
-            <div className="flex items-center justify-between">
-              <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                Recent Transactions
-              </h3>
-              <button className={`${isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-800'} text-sm font-medium`}>
-                View All
-              </button>
+        <Card>
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <div>
+                <CardTitle className="text-xl font-semibold">Recent Transactions</CardTitle>
+                <p className="text-muted-foreground">Your latest wallet activity</p>
+              </div>
+              <Link to="/partner/dashboard/wallet/history">
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  View All
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </Link>
             </div>
-          </div>
-          
-          <div className={`divide-y ${isDarkMode ? 'divide-gray-700' : 'divide-gray-200'}`}>
-            {transactions.length === 0 ? (
-              <div className="p-8 text-center">
-                <History className={`w-12 h-12 mx-auto mb-4 ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`} />
-                <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>No transactions yet</p>
-                <p className={`text-sm mt-1 ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
-                  Your transaction history will appear here
-                </p>
+          </CardHeader>
+          <CardContent>
+            {transactions && transactions.length === 0 ? (
+              <div className="text-center py-12">
+                <Wallet className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-foreground mb-2">No transactions yet</h3>
+                <p className="text-muted-foreground mb-4">Start earning to see your transaction history</p>
+                <Button onClick={handleDeposit} className="flex items-center gap-2">
+                  <Upload className="w-4 h-4" />
+                  Make Your First Deposit
+                </Button>
               </div>
             ) : (
-              transactions.map((transaction) => (
-                <div 
-                  key={transaction.id} 
-                  className={`p-6 transition-colors ${
-                    isDarkMode ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className={`p-2 rounded-lg ${
-                        isDarkMode ? 'bg-gray-700' : 'bg-gray-100'
-                      }`}>
-                        {getTransactionIcon(transaction.type)}
+              <div className="space-y-4">
+                {transactions.slice(0, 10).map((transaction) => {
+                  const paymentInfo = getPaymentMethodInfo(transaction.payment_method || '');
+                  return (
+                    <div
+                      key={transaction.id}
+                      className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="p-2 rounded-full bg-muted">
+                          {getTransactionIcon(transaction.type)}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium text-foreground capitalize">
+                              {transaction.type.replace('_', ' ')}
+                            </p>
+                            <Badge className={getStatusColor(transaction.status)}>
+                              {transaction.status}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {transaction.description}
+                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            {paymentInfo.icon}
+                            <span className={`text-xs ${paymentInfo.color}`}>
+                              {paymentInfo.name}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {formatDate(transaction.created_at)}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <p className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                          {transaction.description}
-                        </p>
-                        <p className={`text-sm ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
-                          {transaction.payment_method && `via ${transaction.payment_method} • `}
-                          {formatDate(transaction.created_at)}
-                        </p>
+                      <div className="text-right">
+                        <div className={`font-semibold ${
+                          transaction.type === 'deposit' || transaction.type === 'commission' || transaction.type === 'bonus'
+                            ? 'text-green-600'
+                            : 'text-red-600'
+                        }`}>
+                          {transaction.type === 'deposit' || transaction.type === 'commission' || transaction.type === 'bonus' ? '+' : '-'}
+                          {formatCurrency(transaction.amount)}
+                        </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className={`font-semibold ${
-                        transaction.type === 'deposit' || transaction.type === 'order_payment' 
-                          ? isDarkMode ? 'text-green-400' : 'text-green-600'
-                          : isDarkMode ? 'text-red-400' : 'text-red-600'
-                      }`}>
-                        {transaction.type === 'deposit' || transaction.type === 'order_payment' ? '+' : '-'}
-                        {formatCurrency(transaction.amount)}
-                      </p>
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        getStatusColor(transaction.status)
-                      }`}>
-                        {transaction.status}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))
+                  );
+                })}
+              </div>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        {/* Info Section */}
-        <div className={`mt-8 rounded-xl p-6 border ${
-          isDarkMode ? 'bg-blue-900/20 border-blue-800/50' : 'bg-blue-50 border-blue-200'
-        }`}>
-          <div className="flex items-start space-x-3">
-            <AlertCircle className={`w-5 h-5 mt-0.5 ${
-              isDarkMode ? 'text-blue-400' : 'text-blue-600'
-            }`} />
-            <div>
-              <h4 className={`font-semibold mb-2 ${
-                isDarkMode ? 'text-blue-300' : 'text-blue-900'
-              }`}>How Your Wallet Works</h4>
-              <ul className={`text-sm space-y-1 ${
-                isDarkMode ? 'text-blue-200/80' : 'text-blue-800'
-              }`}>
-                <li>• Your available balance is automatically used when you process or pay for your pending order</li>
-                <li>• Pending balance includes earnings from orders that are still processing</li>
-                <li>• You can add funds via PayPal or cryptocurrency</li>
-                <li>• Withdrawals are processed within 24-48 hours</li>
-              </ul>
-            </div>
-          </div>
+        {/* Quick Actions */}
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={handleDeposit}>
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/20">
+                  <Upload className="w-5 h-5 text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">Quick Deposit</CardTitle>
+                  <p className="text-sm text-muted-foreground">Add funds instantly</p>
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={handleWithdraw}>
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/20">
+                  <Download className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">Withdraw Funds</CardTitle>
+                  <p className="text-sm text-muted-foreground">Transfer to your account</p>
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/20">
+                  <Shield className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">Security</CardTitle>
+                  <p className="text-sm text-muted-foreground">Protected transactions</p>
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
         </div>
       </div>
     </div>
