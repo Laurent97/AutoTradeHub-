@@ -55,6 +55,7 @@ import AdminSettings from "./pages/admin/Settings";
 import AdminPasswordReset from "./pages/admin/PasswordReset";
 import ProductForm from "./components/Admin/ProductForm";
 import SeedData from "./pages/admin/SeedData";
+import AdminPayments from "./pages/admin/Payments";
 import LikedItems from "./pages/LikedItems";
 import NotFound from "./pages/NotFound";
 import Shipping from "./pages/Shipping";
@@ -126,7 +127,6 @@ const App = () => (
                 <Route path="wallet" element={<DashboardWallet />} />
                 <Route path="wallet/deposit" element={<WalletDeposit />} />
               </Route>
-              <Route path="/admin" element={<AdminOnlyRoute><AdminDashboard /></AdminOnlyRoute>} />
               <Route path="/admin/users" element={<AdminOnlyRoute><AdminUsers /></AdminOnlyRoute>} />
               <Route path="/admin/products" element={<AdminOnlyRoute><AdminProducts /></AdminOnlyRoute>} />
               <Route path="/admin/products/new" element={<AdminOnlyRoute><ProductForm /></AdminOnlyRoute>} />
@@ -134,9 +134,11 @@ const App = () => (
               <Route path="/admin/partners" element={<AdminOnlyRoute><AdminPartners /></AdminOnlyRoute>} />
               <Route path="/admin/partners-test" element={<AdminOnlyRoute><AdminPartnersTest /></AdminOnlyRoute>} />
               <Route path="/admin/orders" element={<AdminOnlyRoute><AdminOrders /></AdminOnlyRoute>} />
+              <Route path="/admin/payments" element={<AdminOnlyRoute><AdminPayments /></AdminOnlyRoute>} />
               <Route path="/admin/settings" element={<AdminOnlyRoute><AdminSettings /></AdminOnlyRoute>} />
               <Route path="/admin/password-reset" element={<AdminOnlyRoute><AdminPasswordReset /></AdminOnlyRoute>} />
               <Route path="/admin/seed-data" element={<AdminOnlyRoute><SeedData /></AdminOnlyRoute>} />
+              <Route path="/admin" element={<AdminOnlyRoute><AdminDashboard /></AdminOnlyRoute>} />
               <Route path="/orders/:orderId" element={<OrderDetails />} />
               <Route path="/my-orders" element={<MyOrders />} />
               <Route path="/about" element={<About />} />
