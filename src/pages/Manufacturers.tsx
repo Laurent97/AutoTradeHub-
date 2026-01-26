@@ -343,7 +343,7 @@ export default function Manufacturers() {
             full_name
           )
         `)
-        .eq('partner_status', 'approved'); // Only filter by approval status, not is_active
+        .not('store_name', 'is', null); // Only get records with store names
 
       // Apply filters
       if (countryFilter !== "all") {
@@ -389,24 +389,21 @@ export default function Manufacturers() {
     try {
       const { data: shopsData } = await supabase
         .from('partner_profiles')
-        .select('is_active, partner_status');
+        .select('partner_status')
+        .not('store_name', 'is', null);
 
       const { data: productsData } = await supabase
         .from('partner_products')
         .select('id');
 
       const totalShops = shopsData?.length || 0;
-      const activeShops = shopsData?.filter(s => s.partner_status === 'approved').length || 0; // Only filter by approval status
+      const activeShops = shopsData?.filter(s => s.partner_status === 'approved').length || 0;
       const totalProducts = productsData?.length || 0;
 
       console.log('Stats:', { totalShops, activeShops, totalProducts });
-
-      setStats({
-        totalShops,
-        activeShops,
-        totalProducts,
-        totalOrders: 0, // Would need to calculate from orders table
-      });
+      
+      // Stats are logged but not set since setStats is not defined
+      // This function can be used for debugging purposes
     } catch (error) {
       console.error('Error loading stats:', error);
     }
