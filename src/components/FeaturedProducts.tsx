@@ -25,10 +25,10 @@ const ProductCard = ({ product }: { product: any }) => {
   return (
     <Link
       to={`/products/${product.id}`}
-      className="group bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300"
+      className="group bg-card rounded-xl overflow-hidden border border-border hover:border-blue-300 hover:shadow-lg transition-all duration-300"
     >
       {/* Image Container */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-gray-50">
+      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         <img
           src={imageUrl}
           alt={product.title}
@@ -72,15 +72,15 @@ const ProductCard = ({ product }: { product: any }) => {
         
         {/* Supplier Info */}
         <div className="absolute bottom-3 left-3 right-3">
-          <div className="bg-white/95 backdrop-blur-sm rounded-lg px-3 py-2 flex items-center justify-between">
+          <div className="bg-card/95 backdrop-blur-sm rounded-lg px-3 py-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Building2 className="w-3 h-3 text-blue-600" />
-              <span className="text-xs font-medium text-slate-700 truncate">
+              <span className="text-xs font-medium text-foreground truncate">
                 {product.supplier || 'Verified Supplier'}
               </span>
             </div>
             {product.min_order && (
-              <span className="text-xs text-slate-500">Min: {product.min_order}</span>
+              <span className="text-xs text-muted-foreground">Min: {product.min_order}</span>
             )}
           </div>
         </div>
@@ -95,19 +95,19 @@ const ProductCard = ({ product }: { product: any }) => {
           </span>
           <div className="flex items-center gap-1">
             <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-            <span className="text-sm font-medium text-slate-700">{product.rating || '4.5'}</span>
-            <span className="text-xs text-slate-500">({product.reviews || '128'})</span>
+            <span className="text-sm font-medium text-foreground">{product.rating || '4.5'}</span>
+            <span className="text-xs text-muted-foreground">({product.reviews || '128'})</span>
           </div>
         </div>
 
         {/* Title */}
-        <h3 className="font-semibold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2 text-sm">
+        <h3 className="font-semibold text-foreground mb-2 group-hover:text-blue-600 transition-colors line-clamp-2 text-sm">
           {product.title}
         </h3>
 
         {/* Details for cars */}
         {product.category === "car" && (
-          <div className="flex items-center gap-3 text-xs text-slate-500 mb-3">
+          <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
             {product.year && <span>{product.year}</span>}
             {product.mileage && <span>{product.mileage.toLocaleString()} km</span>}
             {product.location && (
@@ -120,7 +120,7 @@ const ProductCard = ({ product }: { product: any }) => {
         )}
 
         {/* B2B Specific Info */}
-        <div className="flex items-center gap-2 text-xs text-slate-500 mb-3">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
           {product.moq && (
             <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded">
               MOQ: {product.moq}
@@ -136,11 +136,11 @@ const ProductCard = ({ product }: { product: any }) => {
         {/* Price */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-slate-900">
+            <span className="text-lg font-bold text-foreground">
               {formatPrice(Number(product.original_price || product.price))}
             </span>
             {product.original_price && product.price < product.original_price && (
-              <span className="text-sm text-slate-500 line-through">
+              <span className="text-sm text-muted-foreground line-through">
                 {formatPrice(Number(product.price))}
               </span>
             )}
@@ -242,18 +242,18 @@ const FeaturedProducts = () => {
   };
 
   return (
-    <section className="section-padding bg-white">
+    <section className="section-padding bg-card">
       <div className="container-wide">
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-12">
           <div>
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-3">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
               {activeTab === 'featured' && 'Featured Products'}
               {activeTab === 'liked' && 'Your Saved Products'}
               {activeTab === 'recent' && 'New Arrivals'}
               {activeTab === 'suppliers' && 'Top Supplier Products'}
             </h2>
-            <p className="text-slate-600 text-lg">
+            <p className="text-muted-foreground text-lg">
               {activeTab === 'featured' && 'Premium quality products from verified suppliers'}
               {activeTab === 'liked' && 'Products you\'ve saved for future reference'}
               {activeTab === 'recent' && 'Latest additions to our extensive catalog'}
@@ -263,13 +263,13 @@ const FeaturedProducts = () => {
           
           <div className="flex items-center gap-4">
             {/* Tab Navigation */}
-            <div className="flex bg-gray-100 rounded-lg p-1 border border-gray-200">
+            <div className="flex bg-muted rounded-lg p-1 border border-border">
               <button
                 onClick={() => setActiveTab('featured')}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   activeTab === 'featured'
-                    ? 'bg-white text-blue-600 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-card text-blue-600 shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 Featured
@@ -278,8 +278,8 @@ const FeaturedProducts = () => {
                 onClick={() => setActiveTab('suppliers')}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   activeTab === 'suppliers'
-                    ? 'bg-white text-blue-600 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-card text-blue-600 shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 Top Suppliers
@@ -288,8 +288,8 @@ const FeaturedProducts = () => {
                 onClick={() => setActiveTab('recent')}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   activeTab === 'recent'
-                    ? 'bg-white text-blue-600 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-card text-blue-600 shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 New
@@ -298,8 +298,8 @@ const FeaturedProducts = () => {
                 onClick={() => setActiveTab('liked')}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   activeTab === 'liked'
-                    ? 'bg-white text-blue-600 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-card text-blue-600 shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 Saved
@@ -352,12 +352,12 @@ const FeaturedProducts = () => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, index) => (
               <div key={index} className="animate-pulse">
-                <div className="bg-white rounded-xl overflow-hidden border border-gray-200">
-                  <div className="aspect-[4/3] bg-gray-200"></div>
+                <div className="bg-card rounded-xl overflow-hidden border border-border">
+                  <div className="aspect-[4/3] bg-muted"></div>
                   <div className="p-4 space-y-3">
-                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                    <div className="h-4 bg-muted rounded w-3/4"></div>
+                    <div className="h-3 bg-muted rounded w-1/2"></div>
+                    <div className="h-4 bg-muted rounded w-1/3"></div>
                   </div>
                 </div>
               </div>
@@ -377,7 +377,7 @@ const FeaturedProducts = () => {
           </div>
         ) : (
           <div className="text-center py-12">
-            <div className="text-slate-500 mb-4">
+            <div className="text-muted-foreground mb-4">
               {activeTab === 'liked' && 'You haven\'t saved any products yet'}
               {activeTab === 'featured' && 'No featured products available'}
               {activeTab === 'recent' && 'No recent products available'}
@@ -401,12 +401,12 @@ const FeaturedProducts = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/products">
-              <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 font-semibold">
+              <Button size="lg" className="bg-card text-blue-600 hover:bg-blue-50 font-semibold">
                 Start Sourcing
               </Button>
             </Link>
             <Link to="/become-partner">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600">
+              <Button size="lg" variant="outline" className="border-white text-white hover:bg-card hover:text-blue-600">
                 Become a Supplier
               </Button>
             </Link>

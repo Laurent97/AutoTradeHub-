@@ -41,14 +41,14 @@ const features = [
 
 const TrustBadges = () => {
   return (
-    <section className="py-16 bg-gradient-to-br from-slate-50 to-white border-y border-gray-200">
+    <section className="py-16 bg-gradient-to-br from-muted to-card border-y border-border">
       <div className="container-wide">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Why Choose AutoTradeHub
           </h2>
-          <p className="text-lg text-slate-600 max-w-3xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
             Your trusted partner for global automotive trade. We provide comprehensive solutions 
             to ensure safe, efficient, and profitable sourcing.
           </p>
@@ -59,15 +59,15 @@ const TrustBadges = () => {
           {features.map((feature, index) => (
             <div
               key={feature.title}
-              className="group bg-white rounded-xl p-6 border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300"
+              className="group bg-card rounded-xl p-6 border border-border hover:border-blue-300 hover:shadow-lg transition-all duration-300"
             >
               <div className="flex items-start gap-4">
                 <div className="w-14 h-14 rounded-xl bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors flex-shrink-0">
                   <feature.icon className="w-7 h-7 text-blue-600" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-slate-900 mb-2 text-lg">{feature.title}</h3>
-                  <p className="text-slate-600 text-sm leading-relaxed mb-3">
+                  <h3 className="font-bold text-foreground mb-2 text-lg">{feature.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed mb-3">
                     {feature.description}
                   </p>
                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-semibold">
@@ -99,32 +99,32 @@ const TrustBadges = () => {
 
         {/* Trust Indicators */}
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="text-center p-6 bg-white rounded-xl border border-gray-200">
+          <div className="text-center p-6 bg-card rounded-xl border border-border">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Award className="w-8 h-8 text-green-600" />
             </div>
-            <h4 className="font-bold text-slate-900 mb-2">Industry Certified</h4>
-            <p className="text-slate-600 text-sm">
+            <h4 className="font-bold text-foreground mb-2">Industry Certified</h4>
+            <p className="text-muted-foreground text-sm">
               ISO 9001:2015 certified quality management system
             </p>
           </div>
           
-          <div className="text-center p-6 bg-white rounded-xl border border-gray-200">
+          <div className="text-center p-6 bg-card rounded-xl border border-border">
             <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Headphones className="w-8 h-8 text-blue-600" />
             </div>
-            <h4 className="font-bold text-slate-900 mb-2">24/7 Support</h4>
-            <p className="text-slate-600 text-sm">
+            <h4 className="font-bold text-foreground mb-2">24/7 Support</h4>
+            <p className="text-muted-foreground text-sm">
               Multilingual customer support team available round the clock
             </p>
           </div>
           
-          <div className="text-center p-6 bg-white rounded-xl border border-gray-200">
+          <div className="text-center p-6 bg-card rounded-xl border border-border">
             <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Shield className="w-8 h-8 text-purple-600" />
             </div>
-            <h4 className="font-bold text-slate-900 mb-2">Secure Payments</h4>
-            <p className="text-slate-600 text-sm">
+            <h4 className="font-bold text-foreground mb-2">Secure Payments</h4>
+            <p className="text-muted-foreground text-sm">
               Escrow protection and secure payment gateways
             </p>
           </div>
@@ -140,7 +140,7 @@ const TrustBadges = () => {
             <button className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
               Start Trading
             </button>
-            <button className="px-8 py-3 border border-gray-300 text-slate-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors">
+            <button className="px-8 py-3 border border-gray-300 text-foreground font-semibold rounded-lg hover:bg-gray-50 transition-colors">
               Learn More
             </button>
           </div>
