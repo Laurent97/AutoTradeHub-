@@ -192,7 +192,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             id: data.user.id,
             email,
             full_name: fullName,
-            user_type: 'customer',
+            user_type: 'user',
           });
 
           if (profileError) {

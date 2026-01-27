@@ -58,7 +58,7 @@ const Navbar = () => {
       return;
     }
 
-    const userType = userProfile?.user_type || 'customer';
+    const userType = userProfile?.user_type || 'user';
 
     if (userType === 'admin') {
       setDashboardUrl("/admin");

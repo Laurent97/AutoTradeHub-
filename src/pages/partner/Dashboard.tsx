@@ -30,7 +30,7 @@ export default function PartnerDashboard() {
       return;
     }
 
-    const userType = userProfile?.user_type || 'customer';
+    const userType = userProfile?.user_type || 'user';
     
     // Only admins and approved partners can access dashboard
     if (userType === 'admin') {

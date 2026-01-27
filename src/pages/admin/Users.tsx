@@ -41,7 +41,7 @@ export default function AdminUsers() {
   const [editForm, setEditForm] = useState({
     full_name: '',
     phone: '',
-    user_type: 'customer' as UserTypeEnum,
+    user_type: 'user' as UserTypeEnum,
     partner_status: 'pending' as PartnerStatus
   });
   const [userBalances, setUserBalances] = useState<Record<string, WalletBalance>>({});
@@ -512,7 +512,7 @@ export default function AdminUsers() {
                             <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getBadgeColor('user_type', user.user_type)}`}>
                               {user.user_type === 'admin' && '⚙️ '}
                               {user.user_type === 'partner' && '🏪 '}
-                              {user.user_type === 'customer' && '🛒 '}
+                              {user.user_type === 'user' && '🛒 '}
                               {user.user_type}
                             </span>
                             {user.user_type === 'partner' && (

@@ -1,6 +1,6 @@
 // Database type definitions based on Supabase schema
 
-export type UserType = 'customer' | 'partner' | 'admin';
+export type UserType = 'user' | 'partner' | 'admin';
 export type PartnerStatus = 'pending' | 'approved' | 'rejected' | 'suspended';
 export type ProductCategory = 'car' | 'part' | 'accessory';
 export type Condition = 'new' | 'used' | 'reconditioned';
