@@ -60,6 +60,11 @@ export default function DashboardEarnings() {
       // Get accurate wallet balance from wallet service
       const { data: walletData, error: walletError } = await walletService.getBalance(userProfile.id);
       
+      console.log('🔍 Debug - Earnings Data:', earningsData);
+      console.log('🔍 Debug - Wallet Data:', walletData);
+      console.log('🔍 Debug - Earnings Balance:', earningsData?.availableBalance);
+      console.log('🔍 Debug - Wallet Balance:', walletData?.balance);
+      
       if (earningsError || walletError) {
         console.warn('Failed to load data:', { earningsError, walletError });
         // Fallback to zero values if service fails
@@ -75,10 +80,13 @@ export default function DashboardEarnings() {
         });
       } else if (earningsData) {
         // Use wallet balance for availableBalance, not earnings service
-        setEarnings({
+        const finalEarnings = {
           ...earningsData,
           availableBalance: walletData?.balance || 0 // Override with accurate wallet balance
-        });
+        };
+        
+        console.log('🔍 Debug - Final Earnings:', finalEarnings);
+        setEarnings(finalEarnings);
       }
 
     } catch (err) {
