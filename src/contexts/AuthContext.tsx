@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.log(' AuthContext: Fetching user profile for userId:', userId);
       
       // First get user data
-      const { data: userData, error: userError } = await supabase
+      let { data: userData, error: userError } = await supabase
         .from('users')
         .select('*')
         .eq('id', userId)
@@ -76,9 +76,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (!userData) {
         console.log(' AuthContext: No user data found for userId:', userId);
-        setUserProfile(null);
-        setLoading(false);
-        return;
+        
+        // Try to create user profile from auth data as fallback
+        try {
+          const { data: authUser } = await supabase.auth.getUser(userId);
+          if (authUser.user) {
+            console.log(' AuthContext: Attempting to create missing user profile for:', authUser.user.email);
+            
+            const { error: createError } = await supabase.from('users').insert({
+              id: userId,
+              email: authUser.user.email || '',
+              full_name: authUser.user.user_metadata?.full_name || 'User',
+              user_type: 'user',
+            });
+            
+            if (createError) {
+              console.error(' AuthContext: Failed to create fallback user profile:', createError);
+            } else {
+              console.log(' AuthContext: Successfully created fallback user profile');
+              // Try fetching again
+              const { data: retryData, error: retryError } = await supabase
+                .from('users')
+                .select('*')
+                .eq('id', userId)
+                .single();
+              
+              if (!retryError && retryData) {
+                userData = retryData;
+                console.log(' AuthContext: Successfully fetched newly created user profile');
+              }
+            }
+          }
+        } catch (fallbackError) {
+          console.error(' AuthContext: Fallback user profile creation failed:', fallbackError);
+        }
+        
+        if (!userData) {
+          setUserProfile(null);
+          setLoading(false);
+          return;
+        }
       }
 
       console.log(' AuthContext: User data loaded:', userData);
