@@ -141,17 +141,17 @@ SELECT
     la.user_id,
     la.status,
     -- Extract document info from JSON
-    (key).key as public_id,
-    (value).value->>'document_name' as document_name,
-    (value).value->>'document_type' as document_type,
-    (value).value->>'secure_url' as document_url,
-    (value).value->>'resource_type' as resource_type,
-    (value).value->>'format' as format,
-    (value).value->>'size_bytes' as size_bytes,
-    (value).value->>'uploaded_at' as uploaded_at
+    doc_key.key as public_id,
+    doc_value.value->>'document_name' as document_name,
+    doc_value.value->>'document_type' as document_type,
+    doc_value.value->>'secure_url' as document_url,
+    doc_value.value->>'resource_type' as resource_type,
+    doc_value.value->>'format' as format,
+    doc_value.value->>'size_bytes' as size_bytes,
+    doc_value.value->>'uploaded_at' as uploaded_at
 FROM loan_applications la,
-     jsonb_each_text(la.cloudinary_sizes) as key,
-     jsonb_each(la.cloudinary_sizes) as value
+     jsonb_each_text(la.cloudinary_sizes) as doc_key,
+     jsonb_each(la.cloudinary_sizes) as doc_value
 WHERE la.cloudinary_sizes IS NOT NULL AND jsonb_typeof(la.cloudinary_sizes) = 'object';
 
 -- Grant access to the Cloudinary documents view
