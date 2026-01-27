@@ -1,4 +1,6 @@
 import { Shield, Award, Globe, Headphones, Building2, Truck, CheckCircle, TrendingUp } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const features = [
   {
@@ -137,12 +139,16 @@ const TrustBadges = () => {
             Join 50,000+ Businesses Trusting AutoTradeHub
           </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
-              Start Trading
-            </button>
-            <button className="px-8 py-3 border border-gray-300 text-foreground font-semibold rounded-lg hover:bg-gray-50 transition-colors">
-              Learn More
-            </button>
+            <Link to="/products">
+              <Button className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
+                Start Trading
+              </Button>
+            </Link>
+            <Link to="/about">
+              <Button variant="outline" className="px-8 py-3 border border-gray-300 text-foreground font-semibold rounded-lg hover:bg-gray-50 transition-colors">
+                Learn More
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
