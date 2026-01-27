@@ -66,9 +66,9 @@ export default function TradeAssurance() {
 
   return (
     <>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         {/* Hero Section */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-800 dark:to-blue-900 text-white">
           <div className="container mx-auto px-4 py-16">
             <div className="max-w-4xl mx-auto text-center">
               <div className="flex justify-center mb-6">
@@ -93,24 +93,24 @@ export default function TradeAssurance() {
         </div>
 
         {/* Stats Section */}
-        <div className="bg-white py-12 border-b">
+        <div className="bg-white dark:bg-gray-800 py-12 border-b border-gray-200 dark:border-gray-700">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
               <div>
                 <div className="text-3xl font-bold text-blue-600 mb-2">$10M+</div>
-                <div className="text-gray-600">Protected Transactions</div>
+                <div className="text-gray-600 dark:text-gray-400">Protected Transactions</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-blue-600 mb-2">50K+</div>
-                <div className="text-gray-600">Happy Customers</div>
+                <div className="text-gray-600 dark:text-gray-400">Happy Customers</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-blue-600 mb-2">99.9%</div>
-                <div className="text-gray-600">Success Rate</div>
+                <div className="text-gray-600 dark:text-gray-400">Success Rate</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-blue-600 mb-2">24/7</div>
-                <div className="text-gray-600">Support Available</div>
+                <div className="text-gray-600 dark:text-gray-400">Support Available</div>
               </div>
             </div>
           </div>
@@ -119,15 +119,15 @@ export default function TradeAssurance() {
         {/* Main Content */}
         <div className="container mx-auto px-4 py-12">
           {/* Tabs */}
-          <div className="flex flex-wrap gap-2 mb-8 border-b">
+          <div className="flex flex-wrap gap-2 mb-8 border-b border-gray-200 dark:border-gray-700">
             {['overview', 'how-it-works', 'coverage', 'claims'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`px-6 py-3 font-medium capitalize transition-colors ${
                   activeTab === tab
-                    ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-600 hover:text-blue-600'
+                    ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400'
                 }`}
               >
                 {tab.replace('-', ' ')}
@@ -149,13 +149,13 @@ export default function TradeAssurance() {
                       <div className="text-blue-600 mt-1">{benefit.icon}</div>
                       <div>
                         <h3 className="font-semibold mb-1">{benefit.title}</h3>
-                        <p className="text-gray-600">{benefit.description}</p>
+                        <span className="text-gray-700 dark:text-gray-300">{benefit.description}</span>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
-              <div className="bg-blue-50 rounded-xl p-8">
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-8">
                 <h3 className="text-2xl font-bold mb-4">Get Started Today</h3>
                 <p className="text-gray-600 mb-6">
                   Join thousands of satisfied customers who shop with confidence through Trade Assurance.
