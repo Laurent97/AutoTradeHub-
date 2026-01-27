@@ -21,6 +21,7 @@ import {
   TrendingUp, 
   Clock,
   CheckCircle,
+  Check,
   XCircle,
   AlertTriangle,
   RefreshCw,
@@ -308,7 +309,7 @@ const Payments: React.FC = () => {
         .from('wallet_transactions')
         .select(`
           *,
-          user:profiles(id, email, full_name)
+          user:auth.users(id, email, full_name)
         `)
         .order('created_at', { ascending: false })
         .limit(100);
@@ -342,7 +343,7 @@ const Payments: React.FC = () => {
         .from('wallet_balances')
         .select(`
           *,
-          user:profiles(id, email, full_name)
+          user:auth.users(id, email, full_name)
         `)
         .order('balance', { ascending: false })
         .limit(100);
