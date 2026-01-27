@@ -39,6 +39,11 @@ interface PaymentSettings {
   paypal_client_secret: string;
   crypto_enabled: boolean;
   crypto_wallet_address: string;
+  btc_address: string;
+  usdt_trx_address: string;
+  eth_address: string;
+  xrp_address: string;
+  xrp_tag: string;
 }
 
 export default function AdminSettings() {
@@ -83,7 +88,12 @@ export default function AdminSettings() {
     paypal_client_id: '',
     paypal_client_secret: '',
     crypto_enabled: false,
-    crypto_wallet_address: ''
+    crypto_wallet_address: '',
+    btc_address: '1FTUbAx5QNTWbxyerMPpxRbwqH3XnvwKQb',
+    usdt_trx_address: 'TYdFjAfhWL9DjaDBAe5LS7zUjBqpYGkRYB',
+    eth_address: '0xd5fffaa3740af39c265563aec8c14bd08c05e838',
+    xrp_address: 'rNxp4h8apvRis6mJf9Sh8C6iRxfrDWN7AV',
+    xrp_tag: '476565842'
   });
 
   useEffect(() => {
@@ -738,21 +748,88 @@ export default function AdminSettings() {
                       </label>
                     </div>
                     
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          � Bitcoin (BTC) Address
+                        </label>
+                        <input
+                          type="text"
+                          value={paymentSettings.btc_address}
+                          onChange={(e) => setPaymentSettings({...paymentSettings, btc_address: e.target.value})}
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:focus:ring-amber-400 dark:focus:border-amber-400 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={!paymentSettings.crypto_enabled}
+                          placeholder="1FTUbAx5QNTWbxyerMPpxRbwqH3XnvwKQb"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          🟡 USDT (TRX-20) Address
+                        </label>
+                        <input
+                          type="text"
+                          value={paymentSettings.usdt_trx_address}
+                          onChange={(e) => setPaymentSettings({...paymentSettings, usdt_trx_address: e.target.value})}
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:focus:ring-amber-400 dark:focus:border-amber-400 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={!paymentSettings.crypto_enabled}
+                          placeholder="TYdFjAfhWL9DjaDBAe5LS7zUjBqpYGkRYB"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          🔷 Ethereum (ERC-20) Address
+                        </label>
+                        <input
+                          type="text"
+                          value={paymentSettings.eth_address}
+                          onChange={(e) => setPaymentSettings({...paymentSettings, eth_address: e.target.value})}
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:focus:ring-amber-400 dark:focus:border-amber-400 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={!paymentSettings.crypto_enabled}
+                          placeholder="0xd5fffaa3740af39c265563aec8c14bd08c05e838"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          ⚫ Ripple (XRP) Address
+                        </label>
+                        <input
+                          type="text"
+                          value={paymentSettings.xrp_address}
+                          onChange={(e) => setPaymentSettings({...paymentSettings, xrp_address: e.target.value})}
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:focus:ring-amber-400 dark:focus:border-amber-400 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={!paymentSettings.crypto_enabled}
+                          placeholder="rNxp4h8apvRis6mJf9Sh8C6iRxfrDWN7AV"
+                        />
+                      </div>
+                    </div>
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        👛 Default Wallet Address
+                        🏷️ XRP Destination Tag
                       </label>
                       <input
                         type="text"
-                        value={paymentSettings.crypto_wallet_address}
-                        onChange={(e) => setPaymentSettings({...paymentSettings, crypto_wallet_address: e.target.value})}
+                        value={paymentSettings.xrp_tag}
+                        onChange={(e) => setPaymentSettings({...paymentSettings, xrp_tag: e.target.value})}
                         className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:focus:ring-amber-400 dark:focus:border-amber-400 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={!paymentSettings.crypto_enabled}
-                        placeholder="0x..."
+                        placeholder="476565842"
                       />
+                    </div>
+
+                    <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                      <p className="text-sm text-blue-800 dark:text-blue-200">
+                        <strong>💡 Important:</strong> These addresses will be displayed to users when they choose to pay with cryptocurrency. Make sure all addresses are correct before enabling crypto payments.
+                      </p>
                     </div>
                   </div>
                 </div>
+
               </div>
 
               <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 flex justify-end">
