@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
+import { walletService } from '@/lib/supabase/wallet-service';
 import { 
   Banknote, 
   Mail, 
@@ -45,10 +46,25 @@ export default function WithdrawalForm() {
 
   // Load user balance
   useEffect(() => {
-    // This would typically come from your wallet service
-    // For now, using a mock balance
-    setBalance(1250.00);
-  }, []);
+    const loadBalance = async () => {
+      if (!user) return;
+      
+      try {
+        const { data: walletData, error } = await walletService.getBalance(user.id);
+        if (error) {
+          console.error('Error loading balance:', error);
+          setBalance(0);
+        } else {
+          setBalance(walletData?.balance || 0);
+        }
+      } catch (error) {
+        console.error('Error loading balance:', error);
+        setBalance(0);
+      }
+    };
+
+    loadBalance();
+  }, [user]);
 
   const withdrawalMethods = [
     {
@@ -115,13 +131,51 @@ export default function WithdrawalForm() {
   };
 
   const handleWithdrawalSubmit = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication Error",
+        description: "You must be logged in to request a withdrawal.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
     
     try {
-      // Simulate API call for withdrawal request submission (not processing)
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Show success message for request submission
+      // Get withdrawal details based on method
+      let withdrawalDetails = '';
+      switch (formData.withdrawalMethod) {
+        case 'bank':
+          withdrawalDetails = `Bank Transfer - ${formData.bankName} (Account: ${formData.bankAccount?.slice(-4)})`;
+          break;
+        case 'paypal':
+          withdrawalDetails = `PayPal - ${formData.email}`;
+          break;
+        case 'crypto':
+          withdrawalDetails = `Crypto - ${formData.cryptoAddress?.slice(-10)}...`;
+          break;
+        case 'card':
+          withdrawalDetails = `Card Transfer - ${formData.cardHolder} (****${formData.cardNumber?.slice(-4)})`;
+          break;
+        default:
+          withdrawalDetails = `${formData.withdrawalMethod} withdrawal`;
+      }
+
+      // Create withdrawal transaction using wallet service
+      const { data: transaction, error } = await walletService.withdrawFunds(
+        user.id,
+        formData.amount,
+        formData.withdrawalMethod,
+        withdrawalDetails
+      );
+
+      if (error) {
+        console.error('Withdrawal error:', error);
+        throw error;
+      }
+
+      // Show success message
       toast({
         title: "Withdrawal Request Submitted!",
         description: `$${getNetAmount().toFixed(2)} withdrawal request has been submitted for admin approval.`,
@@ -133,14 +187,26 @@ export default function WithdrawalForm() {
           success: true,
           message: `Withdrawal request of $${getNetAmount().toFixed(2)} has been submitted for admin approval. You will be notified once it's approved.`,
           amount: getNetAmount(),
-          pendingApproval: true
+          pendingApproval: true,
+          transactionId: transaction?.id
         }
       });
       
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Withdrawal error:', error);
+      let errorMessage = "There was an error submitting your withdrawal request. Please try again.";
+      
+      if (error.message?.includes('Insufficient balance')) {
+        errorMessage = "Insufficient balance. Please check your available balance and try again.";
+      } else if (error.code === '42501') {
+        errorMessage = "Permission denied. You don't have access to withdraw funds. Please contact support.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Withdrawal Request Failed",
-        description: "There was an error submitting your withdrawal request. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
