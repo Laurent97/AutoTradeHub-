@@ -48,7 +48,7 @@ const HeroSection = () => {
             {/* Professional Heading */}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
               Global Automotive
-              <span className="block text-blue-600">Trading Platform</span>
+              <span className="block text-blue-600">Trading Hub</span>
             </h1>
 
             {/* B2B Description */}
