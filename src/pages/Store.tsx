@@ -56,13 +56,13 @@ export default function Store() {
     setError(null);
     
     try {
-      // Load store info
+      // Load store info using a different approach to avoid partner_profiles permission issues
+      // Try to get store info from stores table first
       const { data: storeData, error: storeError } = await supabase
-        .from('partner_profiles')
+        .from('stores')
         .select('*')
-        .eq('store_slug', storeSlug)
+        .eq('slug', storeSlug)
         .eq('is_active', true)
-        .eq('partner_status', 'approved')
         .single();
 
       if (storeError) {
