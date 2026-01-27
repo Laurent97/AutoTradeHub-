@@ -307,10 +307,7 @@ const Payments: React.FC = () => {
       // Fetch wallet transactions
       let walletTransactionsQuery = supabase
         .from('wallet_transactions')
-        .select(`
-          *,
-          user:auth.users(id, email, full_name)
-        `)
+        .select('*')
         .order('created_at', { ascending: false })
         .limit(100);
 
@@ -341,15 +338,12 @@ const Payments: React.FC = () => {
       // Fetch wallet balances
       let walletBalancesQuery = supabase
         .from('wallet_balances')
-        .select(`
-          *,
-          user:auth.users(id, email, full_name)
-        `)
+        .select('*')
         .order('balance', { ascending: false })
         .limit(100);
 
       if (searchTerm) {
-        walletBalancesQuery = walletBalancesQuery.or(`user.email.ilike.%${searchTerm}%,user.full_name.ilike.%${searchTerm}%`);
+        walletBalancesQuery = walletBalancesQuery.or(`user_id.ilike.%${searchTerm}%`);
       }
 
       const { data: walletBalancesData, error: walletBalancesError } = await walletBalancesQuery;
