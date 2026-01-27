@@ -1,12 +1,19 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Store, Users, TrendingUp, Shield, Star, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Store, Users, TrendingUp, Shield, Star, CheckCircle, AlertCircle, LayoutDashboard } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import PartnerRegistrationForm from '../components/Partner/PartnerRegistrationForm';
+import { useAuth } from '../contexts/AuthContext';
 
 const BecomePartner: React.FC = () => {
   const navigate = useNavigate();
+  const { userProfile, loading } = useAuth();
+
+  // Check if user is already a partner or has applied
+  const isPartner = userProfile?.user_type === 'partner';
+  const isPendingPartner = userProfile?.user_type === 'partner' && userProfile?.partner_status === 'pending';
+  const isApprovedPartner = userProfile?.user_type === 'partner' && userProfile?.partner_status === 'approved';
 
   const benefits = [
     {
@@ -71,40 +78,121 @@ const BecomePartner: React.FC = () => {
         </div>
       </div>
 
-      {/* Hero Section */}
-      <div className="container-wide py-12 lg:py-20">
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 mb-6">
-            <Store className="w-4 h-4" />
-            <span className="text-sm font-medium">Partner Program</span>
-          </div>
-          
-          <h2 className="text-4xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
-            Start Your Own
-            <span className="block text-gradient-blue">
-              Auto Business
-            </span>
-          </h2>
-          
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
-            Become a drop-shipping partner and sell cars, parts, and accessories from our catalog. 
-            No inventory needed — we handle shipping and logistics.
-          </p>
-
-          {/* Stats */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-3xl lg:text-4xl font-bold text-blue-600 dark:text-blue-400 mb-1">
-                  {stat.number}
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  {stat.label}
-                </div>
+      {/* Partner Status Check */}
+      {!loading && isPartner && (
+        <div className="container-wide py-12">
+          <Card className="max-w-2xl mx-auto border-0 shadow-xl dark:bg-gray-800 dark:border-gray-700">
+            <CardHeader className="text-center pb-6">
+              <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 ${
+                isApprovedPartner 
+                  ? 'bg-gradient-to-r from-green-600 to-emerald-600' 
+                  : 'bg-gradient-to-r from-amber-600 to-orange-600'
+              }`}>
+                {isApprovedPartner ? (
+                  <CheckCircle className="w-8 h-8 text-white" />
+                ) : (
+                  <AlertCircle className="w-8 h-8 text-white" />
+                )}
               </div>
-            ))}
+              <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                {isApprovedPartner ? 'You are already a Partner!' : 'Partner Application Pending'}
+              </CardTitle>
+              <CardDescription className="text-gray-600 dark:text-gray-400 text-lg">
+                {isApprovedPartner 
+                  ? 'Your partner account is active and ready to use.'
+                  : 'Your partner application is currently under review.'
+                }
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center px-6 pb-8">
+              <div className="mb-6">
+                <p className="text-gray-700 dark:text-gray-300 mb-4">
+                  {isApprovedPartner 
+                    ? 'Access your partner dashboard to manage your store, view analytics, and track your earnings.'
+                    : 'Our team is reviewing your application. You will receive an email once your application is approved.'
+                  }
+                </p>
+                {isPendingPartner && (
+                  <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/30 rounded-lg p-4 mb-4">
+                    <p className="text-amber-800 dark:text-amber-200 text-sm">
+                      <strong>Status:</strong> Application under review<br />
+                      <strong>Next Steps:</strong> You will be notified via email once approved
+                    </p>
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button 
+                  size="lg" 
+                  className="btn-primary"
+                  onClick={() => navigate('/partner/dashboard')}
+                >
+                  <LayoutDashboard className="w-4 h-4 mr-2" />
+                  Go to Partner Dashboard
+                </Button>
+                {!isApprovedPartner && (
+                  <Button 
+                    variant="outline" 
+                    size="lg"
+                    onClick={() => navigate('/partner/info')}
+                  >
+                    Learn More About Partnership
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Show loading state */}
+      {loading && (
+        <div className="container-wide py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-400">Checking your partner status...</p>
           </div>
         </div>
+      )}
+
+      {/* Show full page for non-partners */}
+      {!loading && !isPartner && (
+        <>
+        {/* Hero Section */}
+        <div className="container-wide py-12 lg:py-20">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 mb-6">
+              <Store className="w-4 h-4" />
+              <span className="text-sm font-medium">Partner Program</span>
+            </div>
+            
+            <h2 className="text-4xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+              Start Your Own
+              <span className="block text-gradient-blue">
+                Auto Business
+              </span>
+            </h2>
+            
+            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
+              Become a drop-shipping partner and sell cars, parts, and accessories from our catalog. 
+              No inventory needed — we handle shipping and logistics.
+            </p>
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+              {stats.map((stat, index) => (
+                <div key={index} className="text-center">
+                  <div className="text-3xl lg:text-4xl font-bold text-blue-600 dark:text-blue-400 mb-1">
+                    {stat.number}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    {stat.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
         {/* Benefits Grid */}
         <div className="mb-16">
@@ -232,8 +320,10 @@ const BecomePartner: React.FC = () => {
               <span>Quick Approval</span>
             </div>
           </div>
-        </div>
-      </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
