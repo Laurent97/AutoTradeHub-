@@ -49,8 +49,8 @@ export const ShippingProviderSelect: React.FC<ShippingProviderSelectProps> = ({
               <div>
                 <div className="text-xs text-blue-600 dark:text-blue-400 mb-1">Current Carrier</div>
                 <div className="flex items-center gap-2">
-                  <span className="text-lg">{getProviderIcon(showCurrentInfo.currentCarrier)}</span>
-                  <span className="font-medium text-blue-800 dark:text-blue-200">
+                  <span className="text-xl sm:text-lg">{getProviderIcon(showCurrentInfo.currentCarrier)}</span>
+                  <span className="font-medium text-blue-800 dark:text-blue-200 text-sm">
                     {getProviderByCode(showCurrentInfo.currentCarrier)?.name || showCurrentInfo.currentCarrier}
                   </span>
                 </div>
@@ -138,7 +138,7 @@ export const ShippingProviderSelect: React.FC<ShippingProviderSelectProps> = ({
             </div>
             
             <div className="p-4 bg-white dark:bg-gray-800">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {providers.map((provider) => {
                   const isSelected = value === provider.code;
                   const isRealProvider = Object.keys({
@@ -171,7 +171,7 @@ export const ShippingProviderSelect: React.FC<ShippingProviderSelectProps> = ({
                       
                       <div className="flex items-start gap-3">
                         <div 
-                          className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl"
+                          className="w-14 h-14 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center text-2xl sm:text-xl flex-shrink-0"
                           style={{ backgroundColor: `${provider.color}20` }}
                         >
                           {provider.icon}
