@@ -468,7 +468,8 @@ const Payments: React.FC = () => {
       if (error) throw error;
 
       // Update the order's payment_status to 'paid'
-      const { error: orderError } = await supabase
+      // Try multiple ways to match the order
+      let orderUpdateResult = await supabase
         .from('orders')
         .update({
           payment_status: 'paid',
@@ -477,9 +478,42 @@ const Payments: React.FC = () => {
         })
         .eq('order_number', payment.order_id);
 
-      if (orderError) {
-        console.error('Error updating order payment status:', orderError);
-        throw orderError;
+      if (orderUpdateResult.error) {
+        console.error('Error updating order by order_number:', orderUpdateResult.error);
+        // Try by order_id (UUID) if order_number fails
+        orderUpdateResult = await supabase
+          .from('orders')
+          .update({
+            payment_status: 'paid',
+            status: 'confirmed',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', payment.order_id);
+      }
+
+      if (orderUpdateResult.error) {
+        console.error('Error updating order by order_id:', orderUpdateResult.error);
+        // Try a more flexible search
+        const { data: matchingOrders } = await supabase
+          .from('orders')
+          .select('id')
+          .or(`order_number.eq.${payment.order_id},id.eq.${payment.order_id}`);
+
+        if (matchingOrders && matchingOrders.length > 0) {
+          orderUpdateResult = await supabase
+            .from('orders')
+            .update({
+              payment_status: 'paid',
+              status: 'confirmed',
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', matchingOrders[0].id);
+        }
+      }
+
+      if (orderUpdateResult.error) {
+        console.error('Error updating order payment status after all attempts:', orderUpdateResult.error);
+        throw orderUpdateResult.error;
       }
 
       // Log the approval
@@ -525,7 +559,8 @@ const Payments: React.FC = () => {
       if (error) throw error;
 
       // Update the order's payment_status to 'failed'
-      const { error: orderError } = await supabase
+      // Try multiple ways to match the order
+      let orderUpdateResult = await supabase
         .from('orders')
         .update({
           payment_status: 'failed',
@@ -534,9 +569,42 @@ const Payments: React.FC = () => {
         })
         .eq('order_number', payment.order_id);
 
-      if (orderError) {
-        console.error('Error updating order payment status:', orderError);
-        throw orderError;
+      if (orderUpdateResult.error) {
+        console.error('Error updating order by order_number:', orderUpdateResult.error);
+        // Try by order_id (UUID) if order_number fails
+        orderUpdateResult = await supabase
+          .from('orders')
+          .update({
+            payment_status: 'failed',
+            status: 'pending',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', payment.order_id);
+      }
+
+      if (orderUpdateResult.error) {
+        console.error('Error updating order by order_id:', orderUpdateResult.error);
+        // Try a more flexible search
+        const { data: matchingOrders } = await supabase
+          .from('orders')
+          .select('id')
+          .or(`order_number.eq.${payment.order_id},id.eq.${payment.order_id}`);
+
+        if (matchingOrders && matchingOrders.length > 0) {
+          orderUpdateResult = await supabase
+            .from('orders')
+            .update({
+              payment_status: 'failed',
+              status: 'pending',
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', matchingOrders[0].id);
+        }
+      }
+
+      if (orderUpdateResult.error) {
+        console.error('Error updating order payment status after all attempts:', orderUpdateResult.error);
+        throw orderUpdateResult.error;
       }
 
       // Log the rejection
