@@ -640,145 +640,50 @@ const filteredUsers = users.filter(user => {
     user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.phone?.toLowerCase().includes(searchTerm.toLowerCase());
-  user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  user.phone?.toLowerCase().includes(searchTerm.toLowerCase());
   
-const matchesType = filterType === 'all' || user.user_type === filterType;
+  const matchesType = filterType === 'all' || user.user_type === filterType;
   
-return matchesSearch && matchesType;
+  return matchesSearch && matchesType;
 });
 
 // Color helper function for consistent styling
 const getBadgeColor = (type: string, status?: string) => {
-if (type === 'user_type') {
-  switch (status) {
-    case 'admin':
-      return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
-    case 'partner':
-      return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-    default:
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
-  }
-} else if (type === 'partner_status') {
-  switch (status) {
-    case 'approved':
-      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-    case 'pending':
-      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-    case 'rejected':
-    case 'suspended':
-      return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-    default:
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
-  }
-}
-return '';
-};
-                       1000; // seconds
-
-    const timer = setInterval(async () => {
-      try {
-        // Add visits to partner store
-        const currentMetrics = partnerMetrics[userId];
-        if (currentMetrics) {
-          const updatedVisits = {
-            ...currentMetrics.storeVisits,
-            today: (currentMetrics.storeVisits.today || 0) + config.visitsPerUnit,
-            thisWeek: (currentMetrics.storeVisits.thisWeek || 0) + config.visitsPerUnit,
-            thisMonth: (currentMetrics.storeVisits.thisMonth || 0) + config.visitsPerUnit,
-            allTime: (currentMetrics.storeVisits.allTime || 0) + config.visitsPerUnit
-          };
-
-          // Update local state
-          setPartnerMetrics(prev => ({
-            ...prev,
-            [userId]: {
-              ...prev[userId],
-              storeVisits: updatedVisits
-            }
-          }));
-
-          // Update database
-          await supabase
-            .from('partner_profiles')
-            .update({
-              store_visits: updatedVisits,
-              updated_at: new Date().toISOString()
-            })
-            .eq('user_id', userId);
-
-          console.log(`Added ${config.visitsPerUnit} visits to partner ${userId}`);
-        }
-      } catch (error) {
-        console.error('Error in distribution timer:', error);
-      }
-    }, intervalMs);
-
-    // Store timer reference for cleanup
-    (window as any).visitDistributionTimers = (window as any).visitDistributionTimers || {};
-    (window as any).visitDistributionTimers[userId] = timer;
-  };
-
-  const openBalanceModal = (user: UserType) => {
-    setSelectedUser(user);
-    setBalanceUpdate({
-      userId: user.id,
-      amount: 0,
-      type: 'add',
-      reason: ''
-    });
-    setShowBalanceModal(true);
-  };
-
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = 
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.phone?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesType = filterType === 'all' || user.user_type === filterType;
-    
-    return matchesSearch && matchesType;
-  });
-
-  // Color helper function for consistent styling
-  const getBadgeColor = (type: string, status?: string) => {
-    if (type === 'user_type') {
-      switch (status) {
-        case 'admin':
-          return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
-        case 'partner':
-          return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-        default:
-          return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
-      }
-    } else if (type === 'partner_status') {
-      switch (status) {
-        case 'approved':
-          return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-        case 'pending':
-          return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-        case 'rejected':
-        case 'suspended':
-          return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-        default:
-          return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
-      }
+  if (type === 'user_type') {
+    switch (status) {
+      case 'admin':
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+      case 'partner':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
     }
-    return '';
-  };
+  } else if (type === 'partner_status') {
+    switch (status) {
+      case 'approved':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'rejected':
+      case 'suspended':
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
+    }
+  }
+  return '';
+};
 
-  return (
-    <AdminLayout>
-      <div className="container mx-auto px-4 py-8">
-        {/* Welcome Header */}
-        <div className="mb-10 animate-fade-in">
-          <div className="bg-gradient-to-r from-amber-600 to-amber-700 rounded-2xl p-8 text-white shadow-lg">
-            <h1 className="text-4xl font-bold mb-2">User Management</h1>
-            <p className="text-amber-100/90 text-lg">Manage all users and their balances</p>
-            <p className="text-amber-100/70 mt-1 text-sm">View, edit, and manage customer accounts, partner profiles, and admin access</p>
-          </div>
+return (
+  <AdminLayout>
+    <div className="container mx-auto px-4 py-8">
+      {/* Welcome Header */}
+      <div className="mb-10 animate-fade-in">
+        <div className="bg-gradient-to-r from-amber-600 to-amber-700 rounded-2xl p-8 text-white shadow-lg">
+          <h1 className="text-4xl font-bold mb-2">User Management</h1>
+          <p className="text-amber-100/90 text-lg">Manage all users and their balances</p>
+          <p className="text-amber-100/70 mt-1 text-sm">View, edit, and manage customer accounts, partner profiles, and admin access</p>
         </div>
+      </div>
 
         {/* Filters */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 p-6 mb-6 animate-fade-in hover:shadow-lg transition-shadow">
