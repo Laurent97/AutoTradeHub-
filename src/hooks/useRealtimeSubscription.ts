@@ -96,6 +96,7 @@ export function useRealtimeSubscription<T>(
 export function usePartnerProfiles() {
   return useRealtimeSubscription(
     async () => {
+      console.log('Fetching partner profiles from Supabase...');
       const { data, error } = await supabase
         .from('partner_profiles')
         .select('*')
@@ -104,7 +105,12 @@ export function usePartnerProfiles() {
         .eq('partner_status', 'approved')
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching partner profiles:', error);
+        throw error;
+      }
+      
+      console.log('Partner profiles fetched:', data?.length || 0);
       return data || [];
     },
     {
@@ -143,6 +149,7 @@ export function usePartnerProducts() {
 export function useOrders() {
   return useRealtimeSubscription(
     async () => {
+      console.log('Fetching orders from Supabase...');
       const { data, error } = await supabase
         .from('orders')
         .select(`
@@ -162,7 +169,12 @@ export function useOrders() {
         `)
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching orders:', error);
+        throw error;
+      }
+      
+      console.log('Orders fetched:', data?.length || 0);
       return data || [];
     },
     {
@@ -194,17 +206,20 @@ export function useNotifications() {
 export function useUsers() {
   return useRealtimeSubscription(
     async () => {
+      console.log('Fetching users from Supabase...');
       const { data, error } = await supabase
         .from('users')
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching users:', error);
+        throw error;
+      }
+      
+      console.log('Users fetched:', data?.length || 0);
       return data || [];
     },
-    {
-      table: 'users',
-      event: '*'
-    }
+    { table: 'users', event: '*' }
   );
 }

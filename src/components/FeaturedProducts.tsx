@@ -101,7 +101,7 @@ const ProductCard = ({ product }: { product: any }) => {
         </div>
 
         {/* Title */}
-        <h3 className="font-semibold text-foreground mb-2 group-hover:text-blue-600 transition-colors line-clamp-2 text-sm">
+        <h3 className="font-semibold text-foreground mb-2 group-hover:text-blue-600 transition-colors line-clamp-2 text-sm md:text-base">
           {product.title}
         </h3>
 
