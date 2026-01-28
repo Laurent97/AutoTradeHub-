@@ -54,9 +54,13 @@ export default async function handler(req, res) {
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
     
     console.log('RESEND_API_KEY exists:', !!RESEND_API_KEY);
+    console.log('RESEND_API_KEY length:', RESEND_API_KEY?.length);
+    console.log('RESEND_API_KEY starts with re_:', RESEND_API_KEY?.startsWith('re_'));
     
     if (RESEND_API_KEY) {
       try {
+        console.log('Attempting to send email via Resend...');
+        
         const response = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
@@ -73,18 +77,29 @@ export default async function handler(req, res) {
         });
 
         console.log('Resend response status:', response.status);
+        console.log('Resend response headers:', Object.fromEntries(response.headers.entries()));
         
         if (response.ok) {
+          const responseData = await response.json();
+          console.log('Resend success response:', responseData);
           return res.status(200).json({ message: 'Email sent successfully!' });
         } else {
           const errorText = await response.text();
           console.error('Resend error response:', errorText);
+          console.error('Resend error status:', response.status);
           throw new Error(`Resend API error: ${response.status} - ${errorText}`);
         }
       } catch (fetchError) {
         console.error('Fetch error to Resend:', fetchError);
+        console.error('Fetch error details:', {
+          message: fetchError.message,
+          stack: fetchError.stack,
+          name: fetchError.name
+        });
         throw fetchError;
       }
+    } else {
+      console.log('No RESEND_API_KEY found, using fallback logging');
     }
 
     // Option 2: Using EmailJS (alternative - you need to configure EmailJS)
@@ -135,7 +150,24 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Contact form error:', error);
-    return res.status(500).json({ error: 'Failed to send message. Please try again.' });
+    console.error('Contact form error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Check if it's a Resend API error
+    if (error.message.includes('Resend')) {
+      return res.status(500).json({ 
+        error: 'Email service error. Please check Resend configuration.',
+        details: error.message 
+      });
+    }
+    
+    return res.status(500).json({ 
+      error: 'Failed to send message. Please try again.',
+      debug: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 }
