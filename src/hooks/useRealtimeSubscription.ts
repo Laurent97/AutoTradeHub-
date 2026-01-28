@@ -50,36 +50,37 @@ export function useRealtimeSubscription<T>(
     // Initial load
     refresh();
 
+    // Temporarily disable real-time subscriptions to avoid connection errors
     // Set up real-time subscription
-    const channelName = `${options.table}_realtime_${Date.now()}`;
-    const subscription = supabase
-      .channel(channelName)
-      .on(
-        'postgres_changes' as any,
-        {
-          event: options.event || '*',
-          schema: options.schema || 'public',
-          table: options.table,
-          filter: options.filter
-        },
-        (payload) => {
-          console.log(`Real-time update for ${options.table}:`, payload);
-          // Refresh data when changes occur
-          refresh();
-        }
-      )
-      .subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-          // console.log(`Real-time subscription active for ${options.table}`);
-        } else if (status === 'CHANNEL_ERROR') {
-          console.error(`Real-time subscription error for ${options.table}`);
-          setError('Real-time connection error');
-        }
-      });
+    // const channelName = `${options.table}_realtime_${Date.now()}`;
+    // const subscription = supabase
+    //   .channel(channelName)
+    //   .on(
+    //     'postgres_changes' as any,
+    //     {
+    //       event: options.event || '*',
+    //       schema: options.schema || 'public',
+    //       table: options.table,
+    //       filter: options.filter
+    //     },
+    //     (payload) => {
+    //       console.log(`Real-time update for ${options.table}:`, payload);
+    //       // Refresh data when changes occur
+    //       refresh();
+    //     }
+    //   )
+    //   .subscribe((status) => {
+    //     if (status === 'SUBSCRIBED') {
+    //       // console.log(`Real-time subscription active for ${options.table}`);
+    //     } else if (status === 'CHANNEL_ERROR') {
+    //       console.error(`Real-time subscription error for ${options.table}`);
+    //       setError('Real-time connection error');
+    //     }
+    //   });
 
     // Cleanup subscription on unmount
     return () => {
-      supabase.removeChannel(subscription);
+      // supabase.removeChannel(subscription);
     };
   }, [options.table, options.schema, options.event, options.filter]);
 
@@ -123,6 +124,7 @@ export function usePartnerProfiles() {
 export function usePartnerProducts() {
   return useRealtimeSubscription(
     async () => {
+      console.log('Fetching partner products from Supabase...');
       const { data, error } = await supabase
         .from('partner_products')
         .select(`
@@ -136,7 +138,12 @@ export function usePartnerProducts() {
         .eq('in_stock', true)
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching partner products:', error);
+        throw error;
+      }
+      
+      console.log('Partner products fetched:', data?.length || 0);
       return data || [];
     },
     {
@@ -161,7 +168,9 @@ export function useOrders() {
           order_items (
             *,
             products (
-              name,
+              make,
+              model,
+              year,
               price,
               images
             )
