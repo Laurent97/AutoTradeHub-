@@ -1308,15 +1308,9 @@ export default function AdminOrders() {
               <div className="pt-6 border-t flex justify-end space-x-3">
                 <button
                   onClick={() => setShowOrderModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
                 >
                   Close
-                </button>
-                <button
-                  onClick={() => openLogisticsModal(selectedOrder)}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-                >
-                  Update Shipping
                 </button>
               </div>
             </div>
