@@ -9,6 +9,33 @@ import Footer from '../../components/Footer';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import PartnerSidebar from '../../components/Partner/PartnerSidebar';
 import Breadcrumbs from '../../components/Breadcrumbs';
+import { 
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  Eye,
+  Star,
+  Package,
+  ShoppingCart,
+  Users,
+  Activity,
+  Calendar,
+  Award,
+  Target,
+  BarChart3,
+  CreditCard,
+  Store,
+  CheckCircle,
+  AlertCircle,
+  Clock,
+  ArrowUpRight,
+  ArrowDownRight,
+  RefreshCw
+} from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 
 export default function PartnerDashboard() {
   const navigate = useNavigate();
@@ -17,11 +44,15 @@ export default function PartnerDashboard() {
   
   const [partner, setPartner] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [timeRange, setTimeRange] = useState<'today' | 'week' | 'month' | 'all'>('today');
   const [stats, setStats] = useState({
     totalSales: 0,
     pendingOrders: 0,
     totalEarnings: 0,
     conversionRate: 0,
+    averageOrderValue: 0,
+    totalOrders: 0,
     storeVisits: {
       today: 0,
       thisWeek: 0,
@@ -32,7 +63,11 @@ export default function PartnerDashboard() {
     storeCreditScore: 0,
     storeRating: 0,
     totalProducts: 0,
-    activeProducts: 0
+    activeProducts: 0,
+    walletBalance: 0,
+    pendingBalance: 0,
+    monthlyRevenue: 0,
+    lastMonthRevenue: 0
   });
 
   useEffect(() => {
@@ -91,6 +126,8 @@ export default function PartnerDashboard() {
             pendingOrders: stats.pendingOrders || 0,
             totalEarnings: stats.totalEarnings || 0,
             conversionRate: stats.totalOrders > 0 ? (stats.completedOrders / stats.totalOrders) * 100 : 0,
+            averageOrderValue: stats.totalOrders > 0 ? (stats.totalRevenue / stats.totalOrders) : 0,
+            totalOrders: stats.totalOrders || 0,
             storeVisits: {
               today: Math.floor(Math.random() * 50) + 10, // Mock data - replace with real analytics
               thisWeek: Math.floor(Math.random() * 200) + 50,
@@ -101,7 +138,11 @@ export default function PartnerDashboard() {
             storeCreditScore: Math.floor(Math.random() * 200) + 600, // Mock data - set by admin
             storeRating: parseFloat((Math.random() * 2 + 3).toFixed(1)), // Mock data - 3.0-5.0
             totalProducts: Math.floor(Math.random() * 50) + 10,
-            activeProducts: Math.floor(Math.random() * 40) + 5
+            activeProducts: Math.floor(Math.random() * 40) + 5,
+            walletBalance: Math.floor(Math.random() * 5000) + 1000,
+            pendingBalance: Math.floor(Math.random() * 500) + 100,
+            monthlyRevenue: Math.floor(Math.random() * 10000) + 2000,
+            lastMonthRevenue: Math.floor(Math.random() * 8000) + 1500
           });
         }
       } else {
@@ -111,6 +152,8 @@ export default function PartnerDashboard() {
           pendingOrders: 0,
           totalEarnings: 0,
           conversionRate: 0,
+          averageOrderValue: 0,
+          totalOrders: 0,
           storeVisits: {
             today: 0,
             thisWeek: 0,
@@ -121,7 +164,11 @@ export default function PartnerDashboard() {
           storeCreditScore: 0,
           storeRating: 0,
           totalProducts: 0,
-          activeProducts: 0
+          activeProducts: 0,
+          walletBalance: 0,
+          pendingBalance: 0,
+          monthlyRevenue: 0,
+          lastMonthRevenue: 0
         });
       }
     } catch (error) {
@@ -132,6 +179,8 @@ export default function PartnerDashboard() {
         pendingOrders: 0,
         totalEarnings: 0,
         conversionRate: 0,
+        averageOrderValue: 0,
+        totalOrders: 0,
         storeVisits: {
           today: 0,
           thisWeek: 0,
@@ -142,11 +191,30 @@ export default function PartnerDashboard() {
         storeCreditScore: 0,
         storeRating: 0,
         totalProducts: 0,
-        activeProducts: 0
+        activeProducts: 0,
+        walletBalance: 0,
+        pendingBalance: 0,
+        monthlyRevenue: 0,
+        lastMonthRevenue: 0
       });
     } finally {
       setLoading(false);
     }
+  };
+
+  const refreshData = async () => {
+    setRefreshing(true);
+    await loadPartnerData();
+    setRefreshing(false);
+  };
+
+  const calculateTrend = (current: number, previous: number) => {
+    if (previous === 0) return { trend: 'up', percentage: 0 };
+    const percentage = ((current - previous) / previous) * 100;
+    return {
+      trend: percentage >= 0 ? 'up' : 'down',
+      percentage: Math.abs(percentage)
+    };
   };
 
   if (loading) {
@@ -188,287 +256,332 @@ export default function PartnerDashboard() {
   }
 
   return (
-    <div className={`min-h-screen flex flex-col ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="flex-grow">
-        {/* Dashboard Header */}
-        <div className="bg-gradient-to-r from-amber-600 to-amber-700 dark:from-amber-700 dark:to-amber-800 text-white">
-          <div className="container mx-auto px-4 py-4 sm:py-6 lg:py-8">
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-              <div className="flex-1 min-w-0">
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1 sm:mb-2">🏪 Partner Dashboard</h1>
-                <p className="text-amber-100/90 text-sm sm:text-base lg:text-lg truncate">
+      <div className="flex-1">
+        {/* Professional Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+          <div className="container mx-auto px-4 py-8">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <Store className="w-8 h-8" />
+                  <h1 className="text-3xl font-bold">Partner Dashboard</h1>
+                </div>
+                <p className="text-blue-100 text-lg mb-4">
                   Welcome back, {partner?.store_name || userProfile?.email || 'Partner'}!
                 </p>
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 mt-2">
+                <div className="flex items-center gap-4">
                   {partner?.store_id && (
                     <StoreIdBadge storeId={partner.store_id} size="sm" variant="outline" />
                   )}
-                  <p className="text-amber-100/70 text-xs sm:text-sm hidden xs:block">
-                    Manage your store, products, and orders all in one place
-                  </p>
+                  <Badge variant={userProfile?.partner_status === 'approved' ? 'default' : 'secondary'}>
+                    {userProfile?.partner_status === 'approved' ? '✅ Verified Partner' : '⏳ Under Review'}
+                  </Badge>
                 </div>
               </div>
-              <div className="flex flex-col items-end gap-2">
-                <span className={`px-3 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-semibold ${
-                  userProfile?.partner_status === 'approved' ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white' :
-                  userProfile?.partner_status === 'pending' ? 'bg-gradient-to-r from-yellow-500 to-amber-600 text-white' :
-                  userProfile?.partner_status === 'rejected' ? 'bg-gradient-to-r from-red-500 to-rose-600 text-white' :
-                  'bg-gradient-to-r from-gray-500 to-gray-600 text-white'
-                }`}>
-                  {(userProfile?.partner_status || 'PENDING').toUpperCase()}
-                </span>
-                <p className="text-amber-100/80 text-xs sm:text-xs mt-1">
-                  {userProfile?.partner_status === 'approved' ? '✅ Verified Partner' :
-                   userProfile?.partner_status === 'pending' ? '⏳ Under Review' :
-                   userProfile?.partner_status === 'rejected' ? '❌ Application Rejected' :
-                   '📋 Status Pending'}
-                </p>
+              
+              <div className="flex items-center gap-3">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={refreshData}
+                  disabled={refreshing}
+                >
+                  <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="container mx-auto px-4 py-4 sm:py-6 lg:py-8 -mt-4 sm:-mt-6">
-          {/* First Row - Original Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
-            {/* Total Sales Card */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 animate-fade-in hover:shadow-xl hover:-translate-y-1 transition-all">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 p-2 sm:p-3 rounded-lg sm:rounded-xl">
-                  <span className="text-lg sm:text-2xl">💰</span>
+        {/* Main Content */}
+        <div className="container mx-auto px-4 py-8">
+          {/* Key Metrics Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {/* Total Revenue */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  ${stats.totalSales.toLocaleString()}
                 </div>
-                <div className="text-blue-600 dark:text-blue-400 text-xs sm:text-sm font-semibold">Sales</div>
-              </div>
-              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">Total Sales</div>
-              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
-                ${stats.totalSales.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </div>
-            </div>
+                <p className="text-xs text-muted-foreground">
+                  +12% from last month
+                </p>
+              </CardContent>
+            </Card>
 
-            {/* Pending Orders Card */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 animate-fade-in hover:shadow-xl hover:-translate-y-1 transition-all">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/30 dark:to-yellow-800/30 p-2 sm:p-3 rounded-lg sm:rounded-xl">
-                  <span className="text-lg sm:text-2xl">⏳</span>
-                </div>
-                <div className="text-yellow-600 dark:text-yellow-400 text-xs sm:text-sm font-semibold">Orders</div>
-              </div>
-              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">Pending Orders</div>
-              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
-                {stats.pendingOrders}
-              </div>
-            </div>
+            {/* Total Orders */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+                <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.totalOrders}</div>
+                <p className="text-xs text-muted-foreground">
+                  {stats.pendingOrders} pending
+                </p>
+              </CardContent>
+            </Card>
 
-            {/* Total Earnings Card */}
-            <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg border border-green-200 dark:border-green-700/50 p-4 sm:p-6 animate-fade-in hover:shadow-xl hover:-translate-y-1 transition-all">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <div className="bg-gradient-to-br from-green-200 to-green-300 dark:from-green-600 dark:to-green-500 p-2 sm:p-3 rounded-lg sm:rounded-xl">
-                  <span className="text-lg sm:text-2xl">💵</span>
+            {/* Average Order Value */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Avg Order Value</CardTitle>
+                <Target className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  ${stats.averageOrderValue.toFixed(2)}
                 </div>
-                <div className="text-green-600 dark:text-green-400 text-xs sm:text-sm font-semibold">Earnings</div>
-              </div>
-              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">Total Earnings</div>
-              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-700 dark:text-green-300">
-                ${stats.totalEarnings.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </div>
-            </div>
+                <p className="text-xs text-muted-foreground">
+                  Per transaction
+                </p>
+              </CardContent>
+            </Card>
 
-            {/* Conversion Rate Card */}
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg border border-purple-200 dark:border-purple-700/50 p-4 sm:p-6 animate-fade-in hover:shadow-xl hover:-translate-y-1 transition-all">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <div className="bg-gradient-to-br from-purple-200 to-purple-300 dark:from-purple-600 dark:to-purple-500 p-2 sm:p-3 rounded-lg sm:rounded-xl">
-                  <span className="text-lg sm:text-2xl">📊</span>
-                </div>
-                <div className="text-purple-600 dark:text-purple-400 text-xs sm:text-sm font-semibold">Performance</div>
-              </div>
-              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">Conversion Rate</div>
-              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-purple-700 dark:text-purple-300">
-                {stats.conversionRate.toFixed(1)}%
-              </div>
-            </div>
+            {/* Conversion Rate */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.conversionRate.toFixed(1)}%</div>
+                <p className="text-xs text-muted-foreground">
+                  Visit to order ratio
+                </p>
+              </CardContent>
+            </Card>
           </div>
 
-          {/* Second Row - Store Visits and Credit Score */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
-            {/* Today's Visits Card */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 animate-fade-in hover:shadow-xl hover:-translate-y-1 transition-all">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/30 p-2 sm:p-3 rounded-lg sm:rounded-xl">
-                  <span className="text-lg sm:text-2xl">👁️</span>
+          {/* Store Performance Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            {/* Store Visits */}
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Eye className="h-5 w-5" />
+                  Store Visits Analytics
+                </CardTitle>
+                <CardDescription>
+                  Track your store visitor metrics over time
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600">
+                      {stats.storeVisits.today}
+                    </div>
+                    <p className="text-sm text-muted-foreground">Today</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-600">
+                      {stats.storeVisits.thisWeek}
+                    </div>
+                    <p className="text-sm text-muted-foreground">This Week</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-purple-600">
+                      {stats.storeVisits.thisMonth}
+                    </div>
+                    <p className="text-sm text-muted-foreground">This Month</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-orange-600">
+                      {stats.storeVisits.allTime}
+                    </div>
+                    <p className="text-sm text-muted-foreground">All Time</p>
+                  </div>
                 </div>
-                <div className="text-orange-600 dark:text-orange-400 text-xs sm:text-sm font-semibold">Today</div>
-              </div>
-              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">Today's Visits</div>
-              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
-                {stats.storeVisits.today.toLocaleString()}
-              </div>
-              <div className="text-xs text-green-600 dark:text-green-400">
-                +{Math.floor(Math.random() * 20) + 5}% from yesterday
-              </div>
-            </div>
+                
+                {/* Simple Bar Chart Visualization */}
+                <div className="mt-6 space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span>Daily Trend</span>
+                    <span className="text-green-600">+15%</span>
+                  </div>
+                  <div className="flex gap-1 h-8">
+                    {[...Array(7)].map((_, i) => (
+                      <div
+                        key={i}
+                        className={`flex-1 bg-blue-200 rounded-sm ${
+                          i === 0 ? 'h-2' : 
+                          i === 1 ? 'h-4' : 
+                          i === 2 ? 'h-6' : 
+                          i === 3 ? 'h-8' : 
+                          i === 4 ? 'h-6' : 
+                          i === 5 ? 'h-4' : 
+                          'h-2'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-            {/* This Week Visits Card */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 animate-fade-in hover:shadow-xl hover:-translate-y-1 transition-all">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 dark:from-cyan-900/30 dark:to-cyan-800/30 p-2 sm:p-3 rounded-lg sm:rounded-xl">
-                  <span className="text-lg sm:text-2xl">📅</span>
+            {/* Store Rating */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Star className="h-5 w-5" />
+                  Store Performance
+                </CardTitle>
+                <CardDescription>
+                  Your store metrics and ratings
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">Store Rating</span>
+                    <span className="text-sm text-muted-foreground">{stats.storeRating.toFixed(1)}/5</span>
+                  </div>
+                  <div className="flex gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`h-4 w-4 ${
+                          i < Math.floor(stats.storeRating)
+                            ? 'text-yellow-400 fill-current'
+                            : 'text-gray-300'
+                        }`}
+                      />
+                    ))}
+                  </div>
                 </div>
-                <div className="text-cyan-600 dark:text-cyan-400 text-xs sm:text-sm font-semibold">This Week</div>
-              </div>
-              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">This Week</div>
-              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
-                {stats.storeVisits.thisWeek.toLocaleString()}
-              </div>
-              <div className="text-xs text-blue-600 dark:text-blue-400">
-                Avg: {Math.floor(stats.storeVisits.thisWeek / 7)} per day
-              </div>
-            </div>
 
-            {/* Store Credit Score Card */}
-            <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg border border-amber-200 dark:border-amber-700/50 p-4 sm:p-6 animate-fade-in hover:shadow-xl hover:-translate-y-1 transition-all">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <div className="bg-gradient-to-br from-amber-200 to-amber-300 dark:from-amber-600 dark:to-amber-500 p-2 sm:p-3 rounded-lg sm:rounded-xl">
-                  <span className="text-lg sm:text-2xl">⭐</span>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">Credit Score</span>
+                    <span className="text-sm text-muted-foreground">{stats.storeCreditScore}</span>
+                  </div>
+                  <Progress value={(stats.storeCreditScore / 850) * 100} className="h-2" />
                 </div>
-                <div className="text-amber-600 dark:text-amber-400 text-xs sm:text-sm font-semibold">Credit Score</div>
-              </div>
-              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">Store Credit Score</div>
-              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-amber-700 dark:text-amber-300">
-                {stats.storeCreditScore}
-              </div>
-              <div className="flex items-center gap-1 mt-2">
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  stats.storeCreditScore >= 750 ? 'bg-green-100 text-green-800' :
-                  stats.storeCreditScore >= 600 ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-red-100 text-red-800'
-                }`}>
-                  {stats.storeCreditScore >= 750 ? 'Excellent' :
-                   stats.storeCreditScore >= 600 ? 'Good' : 'Fair'}
-                </span>
-              </div>
-            </div>
 
-            {/* Store Rating Card */}
-            <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/30 dark:to-indigo-800/30 rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg border border-indigo-200 dark:border-indigo-700/50 p-4 sm:p-6 animate-fade-in hover:shadow-xl hover:-translate-y-1 transition-all">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <div className="bg-gradient-to-br from-indigo-200 to-indigo-300 dark:from-indigo-600 dark:to-indigo-500 p-2 sm:p-3 rounded-lg sm:rounded-xl">
-                  <span className="text-lg sm:text-2xl">🏆</span>
+                <div className="pt-4 border-t">
+                  <div className="flex items-center justify-between text-sm">
+                    <span>Products</span>
+                    <span>{stats.activeProducts}/{stats.totalProducts}</span>
+                  </div>
+                  <Progress value={(stats.activeProducts / stats.totalProducts) * 100} className="h-2 mt-2" />
                 </div>
-                <div className="text-indigo-600 dark:text-indigo-400 text-xs sm:text-sm font-semibold">Rating</div>
-              </div>
-              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">Store Rating</div>
-              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-indigo-700 dark:text-indigo-300">
-                {stats.storeRating.toFixed(1)}
-              </div>
-              <div className="flex items-center gap-1 mt-2">
-                {[...Array(5)].map((_, i) => (
-                  <span key={i} className={`text-lg ${i < Math.floor(stats.storeRating) ? 'text-yellow-400' : 'text-gray-300'}`}>
-                    ★
-                  </span>
-                ))}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
 
-          {/* Third Row - Additional Metrics */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
-            {/* This Month Visits Card */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 animate-fade-in hover:shadow-xl hover:-translate-y-1 transition-all">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <div className="bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/30 dark:to-teal-800/30 p-2 sm:p-3 rounded-lg sm:rounded-xl">
-                  <span className="text-lg sm:text-2xl">📆</span>
+          {/* Financial Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {/* Wallet Balance */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Available Balance</CardTitle>
+                <CreditCard className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">
+                  ${stats.walletBalance.toLocaleString()}
                 </div>
-                <div className="text-teal-600 dark:text-teal-400 text-xs sm:text-sm font-semibold">This Month</div>
-              </div>
-              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">This Month</div>
-              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
-                {stats.storeVisits.thisMonth.toLocaleString()}
-              </div>
-              <div className="text-xs text-purple-600 dark:text-purple-400">
-                {((stats.storeVisits.thisMonth / stats.storeVisits.lastMonth) * 100).toFixed(1)}% vs last month
-              </div>
-            </div>
+                <p className="text-xs text-muted-foreground">
+                  Ready for withdrawal
+                </p>
+              </CardContent>
+            </Card>
 
-            {/* All Time Visits Card */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 animate-fade-in hover:shadow-xl hover:-translate-y-1 transition-all">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <div className="bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/30 dark:to-pink-800/30 p-2 sm:p-3 rounded-lg sm:rounded-xl">
-                  <span className="text-lg sm:text-2xl">🌟</span>
+            {/* Pending Balance */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Pending Balance</CardTitle>
+                <Clock className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-yellow-600">
+                  ${stats.pendingBalance.toLocaleString()}
                 </div>
-                <div className="text-pink-600 dark:text-pink-400 text-xs sm:text-sm font-semibold">All Time</div>
-              </div>
-              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">All Time</div>
-              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
-                {stats.storeVisits.allTime.toLocaleString()}
-              </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">
-                Since store launch
-              </div>
-            </div>
+                <p className="text-xs text-muted-foreground">
+                  Processing orders
+                </p>
+              </CardContent>
+            </Card>
 
-            {/* Total Products Card */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 animate-fade-in hover:shadow-xl hover:-translate-y-1 transition-all">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <div className="bg-gradient-to-br from-lime-50 to-lime-100 dark:from-lime-900/30 dark:to-lime-800/30 p-2 sm:p-3 rounded-lg sm:rounded-xl">
-                  <span className="text-lg sm:text-2xl">📦</span>
+            {/* Monthly Revenue */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  ${stats.monthlyRevenue.toLocaleString()}
                 </div>
-                <div className="text-lime-600 dark:text-lime-400 text-xs sm:text-sm font-semibold">Products</div>
-              </div>
-              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">Total Products</div>
-              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
-                {stats.totalProducts}
-              </div>
-              <div className="text-xs text-green-600 dark:text-green-400">
-                {stats.activeProducts} active
-              </div>
-            </div>
-
-            {/* Active Products Card */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 animate-fade-in hover:shadow-xl hover:-translate-y-1 transition-all">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/30 dark:to-emerald-800/30 p-2 sm:p-3 rounded-lg sm:rounded-xl">
-                  <span className="text-lg sm:text-2xl">✅</span>
-                </div>
-                <div className="text-emerald-600 dark:text-emerald-400 text-xs sm:text-sm font-semibold">Active</div>
-              </div>
-              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">Active Products</div>
-              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
-                {stats.activeProducts}
-              </div>
-              <div className="text-xs text-blue-600 dark:text-blue-400">
-                {stats.totalProducts > 0 ? ((stats.activeProducts / stats.totalProducts) * 100).toFixed(1) : 0}% of total
-              </div>
-            </div>
+                <p className="text-xs text-muted-foreground">
+                  {calculateTrend(stats.monthlyRevenue, stats.lastMonthRevenue).trend === 'up' ? (
+                    <span className="text-green-600">
+                      +{calculateTrend(stats.monthlyRevenue, stats.lastMonthRevenue).percentage.toFixed(1)}%
+                    </span>
+                  ) : (
+                    <span className="text-red-600">
+                      -{calculateTrend(stats.monthlyRevenue, stats.lastMonthRevenue).percentage.toFixed(1)}%
+                    </span>
+                  )} from last month
+                </p>
+              </CardContent>
+            </Card>
           </div>
 
-          {/* Quick Actions Bar */}
-          <div className="mb-4 sm:mb-6 lg:mb-8">
-            <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          {/* Quick Actions */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+              <CardDescription>
+                Common tasks and shortcuts
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
+                  <Package className="h-6 w-6" />
+                  <span>Add Product</span>
+                </Button>
+                <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
+                  <Activity className="h-6 w-6" />
+                  <span>View Analytics</span>
+                </Button>
+                <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
+                  <Users className="h-6 w-6" />
+                  <span>Customer Support</span>
+                </Button>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
+
           {/* Dashboard Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Sidebar Navigation */}
             <div className="lg:col-span-1">
-              <div className="sticky top-4 sm:top-8">
+              <div className="sticky top-8">
                 <PartnerSidebar />
               </div>
             </div>
 
             {/* Main Content */}
             <div className="lg:col-span-3">
-              <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl lg:rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6 min-h-[400px] sm:min-h-[600px]">
-                {/* Breadcrumbs appear once, globally */}
-                <Breadcrumbs />
-                
-                <div className="mt-4 sm:mt-6">
-                  <Outlet />
-                </div>
-              </div>
+              <Card>
+                <CardContent className="p-6">
+                  <Breadcrumbs />
+                  <div className="mt-6">
+                    <Outlet />
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>
