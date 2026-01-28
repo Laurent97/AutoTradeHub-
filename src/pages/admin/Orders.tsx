@@ -608,6 +608,7 @@ export default function AdminOrders() {
     }
 
     try {
+      // Update old logistics_tracking table
       const { error } = await supabase
         .from('logistics_tracking')
         .upsert({
@@ -623,6 +624,32 @@ export default function AdminOrders() {
 
       if (error) throw error;
 
+      // Also update new order_tracking table for partner dashboard
+      const { data: orderData } = await supabase
+        .from('orders')
+        .select('partner_id')
+        .eq('id', selectedOrder.id)
+        .single();
+
+      if (orderData?.partner_id) {
+        await supabase
+          .from('order_tracking')
+          .upsert({
+            order_id: selectedOrder.order_number || selectedOrder.id,
+            tracking_number: logisticsForm.tracking_number,
+            shipping_method: logisticsForm.shipping_provider,
+            carrier: logisticsForm.shipping_provider,
+            status: logisticsForm.current_status === 'processing' ? 'shipped' : logisticsForm.current_status,
+            admin_id: user?.id,
+            partner_id: orderData.partner_id,
+            estimated_delivery: logisticsForm.estimated_delivery,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'order_id'
+          });
+      }
+
       // Update order status to shipped
       await supabase
         .from('orders')
@@ -637,7 +664,7 @@ export default function AdminOrders() {
       if (orderDetails?.id === selectedOrder.id) {
         loadOrderDetails(selectedOrder.id);
       }
-      alert('Logistics information saved and order marked as shipped');
+      alert('Logistics information saved and order marked as shipped. Partners can now view tracking info.');
     } catch (error) {
       console.error('Error saving logistics:', error);
       alert('Failed to save logistics information');

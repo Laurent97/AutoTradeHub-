@@ -57,6 +57,11 @@ export default function DashboardOrders() {
             ? { ...order, ...payload.new }
             : order
         ));
+        
+        // Refresh tracking data when order status changes to shipped
+        if (payload.new.status === 'shipped' && payload.old?.status !== 'shipped') {
+          loadTrackingData();
+        }
       } else {
         // If order was reassigned from this partner, remove it
         if (payload.old?.partner_id === partnerProfile?.id && payload.new.partner_id !== partnerProfile?.id) {
@@ -65,6 +70,8 @@ export default function DashboardOrders() {
         // If order was assigned to this partner, add it
         if (payload.old?.partner_id !== partnerProfile?.id && payload.new.partner_id === partnerProfile?.id) {
           setOrders(prev => [payload.new, ...prev]);
+          // Load tracking data for new order
+          loadTrackingData();
         }
       }
     },
@@ -73,6 +80,8 @@ export default function DashboardOrders() {
       if (payload.new.partner_id === partnerProfile?.id) {
         // Add new order to beginning of list
         setOrders(prev => [payload.new, ...prev]);
+        // Load tracking data for new order
+        loadTrackingData();
       }
     },
     onOrderDelete: (payload) => {
@@ -270,6 +279,15 @@ export default function DashboardOrders() {
             </button>
           );
         })}
+        <button
+          onClick={() => {
+            loadOrders();
+            loadTrackingData();
+          }}
+          className="px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50"
+        >
+          🔄 Refresh
+        </button>
       </div>
 
       {/* Orders Table */}
