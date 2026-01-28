@@ -205,7 +205,7 @@ export default function AdminOrders() {
 
       // Load logistics info
       const { data: logistics } = await supabase
-        .from('logistics_tracking')
+        .from('order_tracking')
         .select('*')
         .eq('order_id', orderId)
         .single();
@@ -610,9 +610,9 @@ export default function AdminOrders() {
     }
 
     try {
-      // Update old logistics_tracking table
+      // Update order_tracking table
       const { error } = await supabase
-        .from('logistics_tracking')
+        .from('order_tracking')
         .upsert({
           order_id: selectedOrder.id,
           shipping_provider: logisticsForm.shipping_provider,

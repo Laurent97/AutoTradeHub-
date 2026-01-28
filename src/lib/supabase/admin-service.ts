@@ -423,9 +423,9 @@ export const adminService = {
 
       if (updateError) throw updateError;
 
-      // Update logistics tracking
+      // Update order tracking
       const { error: logisticsError } = await supabase
-        .from('logistics_tracking')
+        .from('order_tracking')
         .upsert({
           order_id: orderId,
           tracking_number: trackingNumber,
@@ -466,13 +466,13 @@ export const adminService = {
 
       if (updateError) throw updateError;
 
-      // Update logistics tracking
+      // Update order tracking
       const { error: logisticsError } = await supabase
-        .from('logistics_tracking')
+        .from('order_tracking')
         .upsert({
           order_id: orderId,
           status: 'delivered',
-          delivered_at: new Date().toISOString(),
+          actual_delivery: new Date().toISOString(),
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'order_id'
@@ -490,10 +490,10 @@ export const adminService = {
     }
   },
 
-  // Update logistics information
+  // Update order information
   async updateLogistics(orderId: string, logisticsData: any) {
     const { data, error } = await supabase
-      .from('logistics_tracking')
+      .from('order_tracking')
       .upsert({
         order_id: orderId,
         ...logisticsData,
