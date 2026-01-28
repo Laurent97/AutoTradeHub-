@@ -157,6 +157,7 @@ export function useOrders() {
   return useRealtimeSubscription(
     async () => {
       console.log('Fetching orders from Supabase...');
+      // Temporarily remove products join to avoid schema issues
       const { data, error } = await supabase
         .from('orders')
         .select(`
@@ -166,14 +167,7 @@ export function useOrders() {
             full_name
           ),
           order_items (
-            *,
-            products (
-              make,
-              model,
-              year,
-              price,
-              images
-            )
+            *
           )
         `)
         .order('created_at', { ascending: false });
