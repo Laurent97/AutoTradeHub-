@@ -70,6 +70,7 @@ import VerifyIdentity from "./pages/help/getting-started/VerifyIdentity";
 import FirstOrderGuide from "./pages/help/getting-started/FirstOrderGuide";
 import SearchProducts from "./pages/help/buying/SearchProducts";
 import TrackOrder from "./pages/TrackOrder";
+import Track from "./pages/Track";
 import TradeAssurance from "./pages/TradeAssurance";
 import Inspection from "./pages/Inspection";
 import Financing from "./pages/Financing";
@@ -164,6 +165,7 @@ const App = () => (
               <Route path="/help/buying/search-products" element={<SearchProducts />} />
               <Route path="/returns" element={<Returns />} />
               <Route path="/track-order" element={<TrackOrder />} />
+              <Route path="/track" element={<Track />} />
               <Route path="/shipping" element={<Shipping />} />
               <Route path="/trade-assurance" element={<TradeAssurance />} />
               <Route path="/inspection" element={<Inspection />} />
