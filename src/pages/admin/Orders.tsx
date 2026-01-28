@@ -586,6 +586,36 @@ export default function AdminOrders() {
     }
   };
 
+  const handleMarkAsPaid = async (order: OrderWithDetails) => {
+    const confirmMarkPaid = window.confirm(
+      `💳 Mark Order #${order.order_number || order.id} as Paid?\n\nAmount: $${order.total_amount.toFixed(2)}\n\nThis will update the payment status to 'paid' and order status to 'confirmed'.`
+    );
+    
+    if (!confirmMarkPaid) return;
+    
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({
+          payment_status: 'paid',
+          status: 'confirmed',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', order.id);
+
+      if (error) throw error;
+
+      alert(`✅ Order #${order.order_number || order.id} marked as paid successfully!`);
+      loadOrders();
+      if (orderDetails?.id === order.id) {
+        loadOrderDetails(order.id);
+      }
+    } catch (error) {
+      console.error('Error marking order as paid:', error);
+      alert('Failed to mark order as paid');
+    }
+  };
+
   const handleMarkAsShipped = (order: OrderWithDetails) => {
     setSelectedOrderForShipping(order);
     setShowShippingModal(true);
@@ -1016,6 +1046,14 @@ export default function AdminOrders() {
                                     className="text-success hover:text-success/80 text-left font-medium flex items-center gap-1 transition-colors"
                                   >
                                     🏪 Assign to Partner
+                                  </button>
+                                )}
+                                {order.payment_status === 'pending' && (
+                                  <button
+                                    onClick={() => handleMarkAsPaid(order)}
+                                    className="text-green-600 hover:text-green-800 text-left font-medium flex items-center gap-1 transition-colors"
+                                  >
+                                    💳 Mark as Paid
                                   </button>
                                 )}
                                 {order.status === 'waiting_confirmation' && (
