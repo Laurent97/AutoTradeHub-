@@ -8,8 +8,8 @@ interface EmailData {
 export const emailService = {
   async sendContactEmail(data: EmailData): Promise<{ success: boolean; message: string }> {
     try {
-      // Use the serverless function to send the email
-      const apiUrl = '/api/contact';
+      // Use the Vercel serverless function URL
+      const apiUrl = 'https://autotrade-ochre.vercel.app/api/contact';
       console.log('Sending to API URL:', apiUrl);
       console.log('Current origin:', window.location.origin);
       
