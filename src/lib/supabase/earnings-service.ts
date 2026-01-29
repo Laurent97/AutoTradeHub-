@@ -41,7 +41,7 @@ export const earningsService = {
         .from('wallet_balances')
         .select('balance')
         .eq('user_id', partnerId)
-        .single();
+        .maybeSingle();
 
       let availableBalance = 0;
       if (walletError?.code === 'PGRST116') {

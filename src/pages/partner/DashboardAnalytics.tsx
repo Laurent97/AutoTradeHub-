@@ -78,23 +78,27 @@ export default function DashboardAnalytics() {
       // Get real daily earnings for the last 30 days using direct query
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split('T')[0] + 'T00:00:00.000Z';
+      
       const { data: dailyEarnings, error: dailyError } = await supabase
         .from('orders')
         .select('created_at, total_amount, commission_amount')
         .eq('partner_id', userProfile.id)
         .eq('status', 'completed')
-        .gte('created_at', thirtyDaysAgo.toISOString())
+        .gte('created_at', thirtyDaysAgoStr)
         .order('created_at', { ascending: true });
       
       // Get weekly performance data using direct query
       const twelveWeeksAgo = new Date();
       twelveWeeksAgo.setDate(twelveWeeksAgo.getDate() - (12 * 7));
+      const twelveWeeksAgoStr = twelveWeeksAgo.toISOString().split('T')[0] + 'T00:00:00.000Z';
+      
       const { data: weeklyOrders, error: weeklyError } = await supabase
         .from('orders')
         .select('created_at, total_amount, commission_amount')
         .eq('partner_id', userProfile.id)
         .eq('status', 'completed')
-        .gte('created_at', twelveWeeksAgo.toISOString())
+        .gte('created_at', twelveWeeksAgoStr)
         .order('created_at', { ascending: true });
       
       // Process daily earnings data

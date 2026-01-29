@@ -42,7 +42,9 @@ export const walletService = {
         .from('wallet_balances')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
+
+      console.log('Wallet balance query result:', { data, error });
 
       if (error && error.code === 'PGRST116') {
         console.log('Creating new wallet for user:', userId);
