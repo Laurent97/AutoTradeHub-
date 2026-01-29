@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { supabase } from '../../lib/supabase/client';
 import { partnerService } from '../../lib/supabase/partner-service';
 import { walletService } from '../../lib/supabase/wallet-service';
 import StoreIdBadge from '../../components/ui/StoreIdBadge';
@@ -125,6 +126,21 @@ export default function PartnerDashboard() {
         // Get wallet balance
         const { data: walletData } = await walletService.getBalance(user.id);
         
+        // Get pending transactions for accurate pending balance
+        const { data: pendingTransactions } = await supabase
+          .from('wallet_transactions')
+          .select('amount, status, type')
+          .eq('user_id', user.id)
+          .eq('status', 'pending');
+        
+        // Calculate pending balance from actual pending transactions
+        const pendingBalance = pendingTransactions?.reduce((sum, transaction) => {
+          if (transaction.type === 'deposit' || transaction.type === 'commission' || transaction.type === 'bonus') {
+            return sum + transaction.amount;
+          }
+          return sum; // Don't include withdrawals in pending balance
+        }, 0) || 0;
+        
         if (success && stats) {
           setStats({
             totalSales: stats.totalRevenue || 0,
@@ -145,7 +161,7 @@ export default function PartnerDashboard() {
             totalProducts: partnerData.total_products || 0,
             activeProducts: partnerData.active_products || 0,
             walletBalance: walletData?.balance || 0,
-            pendingBalance: partnerData.pending_balance || 0,
+            pendingBalance: pendingBalance, // Use calculated pending balance
             monthlyRevenue: stats.thisMonthRevenue || 0,
             lastMonthRevenue: stats.lastMonthRevenue || 0
           });

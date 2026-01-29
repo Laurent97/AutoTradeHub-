@@ -120,6 +120,13 @@ export default function DashboardEarnings() {
         .eq('partner_id', userProfile.id)
         .eq('status', 'completed');
       
+      // Get pending transactions for accurate pending balance
+      const { data: pendingTransactions, error: pendingError } = await supabase
+        .from('wallet_transactions')
+        .select('amount, status, type')
+        .eq('user_id', userProfile.id)
+        .eq('status', 'pending');
+      
       console.log('🔍 Debug - Earnings Data:', earningsData);
       console.log('🔍 Debug - Wallet Data:', walletData);
       console.log('🔍 Debug - Partner Profile:', partnerProfile);
@@ -150,6 +157,14 @@ export default function DashboardEarnings() {
         const totalCommission = ordersData?.reduce((sum, order) => sum + (order.commission_amount || 0), 0) || 0;
         const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
         
+        // Calculate pending balance from actual pending transactions
+        const pendingBalance = pendingTransactions?.reduce((sum, transaction) => {
+          if (transaction.type === 'deposit' || transaction.type === 'commission' || transaction.type === 'bonus') {
+            return sum + transaction.amount;
+          }
+          return sum; // Don't include withdrawals in pending balance
+        }, 0) || 0;
+        
         // Use wallet balance for availableBalance, not earnings service
         const finalEarnings = {
           thisMonth: earningsData?.thisMonth || 0,
@@ -157,7 +172,7 @@ export default function DashboardEarnings() {
           thisYear: earningsData?.thisYear || 0,
           allTime: earningsData?.allTime || totalCommission,
           availableBalance: walletData?.balance || 0, // Use accurate wallet balance
-          pendingBalance: earningsData?.pendingBalance || 0,
+          pendingBalance: pendingBalance, // Use calculated pending balance
           commissionEarned: totalCommission,
           averageOrderValue: avgOrderValue,
           totalOrders: totalOrders,
