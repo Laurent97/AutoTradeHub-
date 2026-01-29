@@ -108,7 +108,7 @@ export default function DashboardEarnings() {
         .from('partner_profiles')
         .select('*')
         .eq('user_id', userProfile.id)
-        .single();
+        .maybeSingle();
       
       // Get monthly earnings data for chart
       const { data: monthlyData, error: monthlyError } = await earningsService.getMonthlyEarnings(userProfile.id);

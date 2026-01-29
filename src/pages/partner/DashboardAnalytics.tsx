@@ -64,7 +64,7 @@ export default function DashboardAnalytics() {
         .from('partner_profiles')
         .select('*')
         .eq('user_id', userProfile.id)
-        .single();
+        .maybeSingle();
       
       // Get partner stats for additional metrics
       const { data: stats, error: statsError } = await partnerService.getPartnerStats(userProfile.id);
@@ -76,23 +76,25 @@ export default function DashboardAnalytics() {
       const { data: monthlyEarnings, error: monthlyError } = await earningsService.getMonthlyEarnings(userProfile.id);
       
       // Get real daily earnings for the last 30 days using direct query
-      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       const { data: dailyEarnings, error: dailyError } = await supabase
         .from('orders')
         .select('created_at, total_amount, commission_amount')
         .eq('partner_id', userProfile.id)
         .eq('status', 'completed')
-        .gte('created_at', thirtyDaysAgo)
+        .gte('created_at', thirtyDaysAgo.toISOString())
         .order('created_at', { ascending: true });
       
       // Get weekly performance data using direct query
-      const twelveWeeksAgo = new Date(Date.now() - 12 * 7 * 24 * 60 * 60 * 1000).toISOString();
+      const twelveWeeksAgo = new Date();
+      twelveWeeksAgo.setDate(twelveWeeksAgo.getDate() - (12 * 7));
       const { data: weeklyOrders, error: weeklyError } = await supabase
         .from('orders')
         .select('created_at, total_amount, commission_amount')
         .eq('partner_id', userProfile.id)
         .eq('status', 'completed')
-        .gte('created_at', twelveWeeksAgo)
+        .gte('created_at', twelveWeeksAgo.toISOString())
         .order('created_at', { ascending: true });
       
       // Process daily earnings data
