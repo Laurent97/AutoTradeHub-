@@ -490,7 +490,10 @@ const calculateVisitsPerUnit = (totalVisits: number, timePeriod: 'hour' | 'minut
                         3600; // seconds per hour
   
   const totalPeriods = totalUnits * unitsPerPeriod;
-  return Math.floor(totalVisits / totalPeriods);
+  const visitsPerUnit = totalVisits / totalPeriods;
+  
+  // Return the exact value for precise distribution, not rounded down
+  return visitsPerUnit;
 };
 
 const startVisitDistribution = async (userId: string, totalVisits: number, timePeriod: 'hour' | 'minute' | 'second') => {
@@ -597,38 +600,52 @@ const startDistributionTimer = (userId: string, config: any) => {
                      config.timePeriod === 'minute' ? 60 * 1000 : 
                      1000; // seconds
 
+  // Track accumulated fractional visits
+  let accumulatedVisits = 0;
+
   const timer = setInterval(async () => {
     try {
-      // Add visits to partner store
-      const currentMetrics = partnerMetrics[userId];
-      if (currentMetrics) {
-        const updatedVisits = {
-          ...currentMetrics.storeVisits,
-          today: (currentMetrics.storeVisits.today || 0) + config.visitsPerUnit,
-          thisWeek: (currentMetrics.storeVisits.thisWeek || 0) + config.visitsPerUnit,
-          thisMonth: (currentMetrics.storeVisits.thisMonth || 0) + config.visitsPerUnit,
-          allTime: (currentMetrics.storeVisits.allTime || 0) + config.visitsPerUnit
-        };
+      // Add fractional visits to accumulator
+      accumulatedVisits += config.visitsPerUnit;
+      
+      // Only add whole visits to the store
+      const wholeVisitsToAdd = Math.floor(accumulatedVisits);
+      
+      if (wholeVisitsToAdd > 0) {
+        // Subtract the whole visits from accumulator
+        accumulatedVisits -= wholeVisitsToAdd;
+        
+        // Add visits to partner store
+        const currentMetrics = partnerMetrics[userId];
+        if (currentMetrics) {
+          const updatedVisits = {
+            ...currentMetrics.storeVisits,
+            today: (currentMetrics.storeVisits.today || 0) + wholeVisitsToAdd,
+            thisWeek: (currentMetrics.storeVisits.thisWeek || 0) + wholeVisitsToAdd,
+            thisMonth: (currentMetrics.storeVisits.thisMonth || 0) + wholeVisitsToAdd,
+            allTime: (currentMetrics.storeVisits.allTime || 0) + wholeVisitsToAdd
+          };
 
-        // Update local state
-        setPartnerMetrics(prev => ({
-          ...prev,
-          [userId]: {
-            ...prev[userId],
-            storeVisits: updatedVisits
-          }
-        }));
+          // Update local state
+          setPartnerMetrics(prev => ({
+            ...prev,
+            [userId]: {
+              ...prev[userId],
+              storeVisits: updatedVisits
+            }
+          }));
 
-        // Update database
-        await supabase
-          .from('partner_profiles')
-          .update({
-            store_visits: updatedVisits,
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', userId);
+          // Update database
+          await supabase
+            .from('partner_profiles')
+            .update({
+              store_visits: updatedVisits,
+              updated_at: new Date().toISOString()
+            })
+            .eq('user_id', userId);
 
-        console.log(`Added ${config.visitsPerUnit} visits to partner ${userId}`);
+          console.log(`Added ${wholeVisitsToAdd} visits to partner ${userId} (accumulated: ${accumulatedVisits.toFixed(4)})`);
+        }
       }
     } catch (error) {
       console.error('Error in distribution timer:', error);
