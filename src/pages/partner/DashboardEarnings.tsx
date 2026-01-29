@@ -121,7 +121,7 @@ export default function DashboardEarnings() {
       // First try with partner_id
       const { data: ordersData1, error: ordersError1 } = await supabase
         .from('orders')
-        .select('total_amount, commission_amount, status, created_at')
+        .select('total_amount, status, created_at')
         .eq('partner_id', userProfile.id)
         .eq('status', 'completed');
       
@@ -130,7 +130,7 @@ export default function DashboardEarnings() {
         // Try with customer_id
         const { data: ordersData2, error: ordersError2 } = await supabase
           .from('orders')
-          .select('total_amount, commission_amount, status, created_at')
+          .select('total_amount, status, created_at')
           .eq('customer_id', userProfile.id)
           .eq('status', 'completed');
         
@@ -139,7 +139,7 @@ export default function DashboardEarnings() {
           // Try without partner filter - get all completed orders
           const { data: ordersData3, error: ordersError3 } = await supabase
             .from('orders')
-            .select('total_amount, commission_amount, status, created_at')
+            .select('total_amount, status, created_at')
             .eq('status', 'completed')
             .limit(100);
           
@@ -186,9 +186,10 @@ export default function DashboardEarnings() {
         });
       } else {
         // Calculate real metrics from orders data - COMMISSION ONLY
+        const commissionRate = 0.10; // 10% commission rate
         const totalOrders = ordersData?.length || 0;
         const totalRevenue = ordersData?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0;
-        const totalCommission = ordersData?.reduce((sum, order) => sum + (order.commission_amount || 0), 0) || 0;
+        const totalCommission = ordersData?.reduce((sum, order) => sum + ((order.total_amount || 0) * commissionRate), 0) || 0;
         const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
         
         // Calculate pending balance from PENDING COMMISSIONS ONLY
@@ -218,7 +219,7 @@ export default function DashboardEarnings() {
           totalOrders: totalOrders,
           storeRating: partnerProfile?.store_rating || 0,
           storeCreditScore: partnerProfile?.store_credit_score || 0,
-          commissionRate: partnerProfile?.commission_rate || 0.10
+          commissionRate: commissionRate
         };
         
         console.log('🔍 Debug - Final Earnings:', finalEarnings);

@@ -87,7 +87,7 @@ export default function DashboardAnalytics() {
       // First try with partner_id
       const { data: dailyEarnings1, error: dailyError1 } = await supabase
         .from('orders')
-        .select('created_at, total_amount, commission_amount')
+        .select('created_at, total_amount')
         .eq('partner_id', userProfile.id)
         .eq('status', 'completed')
         .gte('created_at', thirtyDaysAgoStr)
@@ -98,7 +98,7 @@ export default function DashboardAnalytics() {
         // Try with customer_id
         const { data: dailyEarnings2, error: dailyError2 } = await supabase
           .from('orders')
-          .select('created_at, total_amount, commission_amount')
+          .select('created_at, total_amount')
           .eq('customer_id', userProfile.id)
           .eq('status', 'completed')
           .gte('created_at', thirtyDaysAgoStr)
@@ -109,7 +109,7 @@ export default function DashboardAnalytics() {
           // Try without partner filter
           const { data: dailyEarnings3, error: dailyError3 } = await supabase
             .from('orders')
-            .select('created_at, total_amount, commission_amount')
+            .select('created_at, total_amount')
             .eq('status', 'completed')
             .gte('created_at', thirtyDaysAgoStr)
             .order('created_at', { ascending: true })
@@ -137,7 +137,7 @@ export default function DashboardAnalytics() {
       // First try with partner_id
       const { data: weeklyOrders1, error: weeklyError1 } = await supabase
         .from('orders')
-        .select('created_at, total_amount, commission_amount')
+        .select('created_at, total_amount')
         .eq('partner_id', userProfile.id)
         .eq('status', 'completed')
         .gte('created_at', twelveWeeksAgoStr)
@@ -148,7 +148,7 @@ export default function DashboardAnalytics() {
         // Try with customer_id
         const { data: weeklyOrders2, error: weeklyError2 } = await supabase
           .from('orders')
-          .select('created_at, total_amount, commission_amount')
+          .select('created_at, total_amount')
           .eq('customer_id', userProfile.id)
           .eq('status', 'completed')
           .gte('created_at', twelveWeeksAgoStr)
@@ -159,7 +159,7 @@ export default function DashboardAnalytics() {
           // Try without partner filter
           const { data: weeklyOrders3, error: weeklyError3 } = await supabase
             .from('orders')
-            .select('created_at, total_amount, commission_amount')
+            .select('created_at, total_amount')
             .eq('status', 'completed')
             .gte('created_at', twelveWeeksAgoStr)
             .order('created_at', { ascending: true })
@@ -177,15 +177,16 @@ export default function DashboardAnalytics() {
       }
       
       // Process daily earnings data
+      const commissionRate = 0.10; // 10% commission rate
       const realDailyEarnings = dailyEarnings ? 
         Array.from({ length: 30 }, (_, i) => {
           const date = new Date(Date.now() - (29 - i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
           const dayOrders = dailyEarnings.filter(order => order.created_at.startsWith(date));
           return {
             date,
-            earnings: dayOrders.reduce((sum, order) => sum + (order.commission_amount || 0), 0),
+            earnings: dayOrders.reduce((sum, order) => sum + ((order.total_amount || 0) * commissionRate), 0),
             orders: dayOrders.length,
-            profit: dayOrders.reduce((sum, order) => sum + (order.commission_amount || 0), 0)
+            profit: dayOrders.reduce((sum, order) => sum + ((order.total_amount || 0) * commissionRate), 0)
           };
         }) : [];
       
@@ -201,7 +202,7 @@ export default function DashboardAnalytics() {
           return {
             week: `Week ${i + 1}`,
             revenue: weekOrders.reduce((sum, order) => sum + (order.total_amount || 0), 0),
-            profit: weekOrders.reduce((sum, order) => sum + (order.commission_amount || 0), 0),
+            profit: weekOrders.reduce((sum, order) => sum + ((order.total_amount || 0) * commissionRate), 0),
             orders: weekOrders.length
           };
         }) : [];
