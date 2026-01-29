@@ -663,26 +663,21 @@ export default function AdminOrders() {
     }
 
     try {
-      // Get the order_number and partner_id to use in order_tracking table
-      const { data: orderData } = await supabase
-        .from('orders')
-        .select('order_number, partner_id')
-        .eq('id', selectedOrder.id)
-        .single();
-
-      if (!orderData?.order_number) {
-        throw new Error('Order number not found');
-      }
-
-      // Update order_tracking table using order_number as order_id
+      // Update logistics_tracking table using the correct structure
       const { error } = await supabase
-        .from('order_tracking')
+        .from('logistics_tracking')
         .upsert({
-          order_id: orderData.order_number, // Use order_number instead of UUID
-          carrier: logisticsForm.carrier,
+          order_id: selectedOrder.id, // Use UUID order_id as foreign key
+          shipping_provider: logisticsForm.carrier, // Map carrier to shipping_provider
           tracking_number: logisticsForm.tracking_number,
           estimated_delivery: logisticsForm.estimated_delivery,
-          status: logisticsForm.current_status,
+          current_status: logisticsForm.current_status === 'processing' ? 'in_transit' : logisticsForm.current_status, // Map to valid status
+          location_updates: [{
+            status: logisticsForm.current_status === 'processing' ? 'in_transit' : logisticsForm.current_status,
+            location: 'Warehouse',
+            timestamp: new Date().toISOString(),
+            updated_by: user?.id
+          }],
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'order_id'
@@ -690,71 +685,6 @@ export default function AdminOrders() {
 
       if (error) throw error;
 
-      if (orderData?.partner_id) {
-        try {
-          // First try to get existing tracking record
-          const { data: existingTracking } = await supabase
-            .from('order_tracking')
-            .select('*')
-            .eq('order_id', orderData.order_number)
-            .single();
-
-          const trackingData = {
-            order_id: orderData.order_number, // Use order_number consistently
-            tracking_number: logisticsForm.tracking_number,
-            carrier: logisticsForm.carrier,
-            status: logisticsForm.current_status, // Use the current status from form
-            admin_id: user?.id,
-            partner_id: orderData.partner_id,
-            estimated_delivery: logisticsForm.estimated_delivery,
-            updated_at: new Date().toISOString()
-          };
-
-          let trackingRecord;
-          if (existingTracking) {
-            // Update existing record
-            const { data } = await supabase
-              .from('order_tracking')
-              .update(trackingData)
-              .eq('id', existingTracking.id)
-              .select()
-              .single();
-            trackingRecord = data;
-          } else {
-            // Insert new record
-            const { data } = await supabase
-              .from('order_tracking')
-              .insert({
-                ...trackingData,
-                created_at: new Date().toISOString()
-              })
-              .select()
-              .single();
-            trackingRecord = data;
-          }
-
-          // Add initial tracking update
-          if (trackingRecord?.id) {
-            await supabase
-              .from('tracking_updates')
-              .insert({
-                tracking_id: trackingRecord.id,
-                status: logisticsForm.current_status,
-                description: `Tracking updated via ${logisticsForm.carrier} - Status: ${logisticsForm.current_status}`,
-                location: 'Warehouse',
-                timestamp: new Date().toISOString(),
-                updated_by: user?.id
-              });
-          }
-        } catch (trackingError) {
-          console.error('Error managing tracking record:', trackingError);
-          // Continue with order update even if tracking fails
-        }
-      }
-
-      // Only update tracking information, don't change order status
-      // The order status will be managed separately through the status update buttons
-      
       setShowLogisticsModal(false);
       loadOrders();
       if (orderDetails?.id === selectedOrder.id) {
