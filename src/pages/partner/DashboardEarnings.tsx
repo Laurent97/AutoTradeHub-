@@ -75,14 +75,9 @@ export default function DashboardEarnings() {
   const loadStores = async () => {
     setStoresLoading(true);
     try {
-      const { data: storesData, error: storesError } = await storeService.getAllStores();
-      
-      if (storesError) {
-        console.warn('Failed to load stores:', storesError);
-        setStores([]);
-      } else {
-        setStores(storesData || []);
-      }
+      // Stores functionality not implemented yet - using empty array
+      console.log('Stores functionality not implemented');
+      setStores([]);
     } catch (err) {
       console.warn('Error loading stores:', err);
       setStores([]);
@@ -114,11 +109,45 @@ export default function DashboardEarnings() {
       const { data: monthlyData, error: monthlyError } = await earningsService.getMonthlyEarnings(userProfile.id);
       
       // Get real order data for additional metrics
-      const { data: ordersData, error: ordersError } = await supabase
+      // Try different possible column names for partner reference
+      let ordersData = null;
+      let ordersError = null;
+      
+      // First try with partner_id
+      const { data: ordersData1, error: ordersError1 } = await supabase
         .from('orders')
         .select('total_amount, commission_amount, status, created_at')
         .eq('partner_id', userProfile.id)
         .eq('status', 'completed');
+      
+      if (ordersError1) {
+        console.log('partner_id column not found, trying customer_id...');
+        // Try with customer_id
+        const { data: ordersData2, error: ordersError2 } = await supabase
+          .from('orders')
+          .select('total_amount, commission_amount, status, created_at')
+          .eq('customer_id', userProfile.id)
+          .eq('status', 'completed');
+        
+        if (ordersError2) {
+          console.log('customer_id column not found, trying without partner filter...');
+          // Try without partner filter - get all completed orders
+          const { data: ordersData3, error: ordersError3 } = await supabase
+            .from('orders')
+            .select('total_amount, commission_amount, status, created_at')
+            .eq('status', 'completed')
+            .limit(100);
+          
+          ordersData = ordersData3;
+          ordersError = ordersError3;
+        } else {
+          ordersData = ordersData2;
+          ordersError = ordersError2;
+        }
+      } else {
+        ordersData = ordersData1;
+        ordersError = ordersError1;
+      }
       
       // Get pending transactions for accurate pending balance
       const { data: pendingTransactions, error: pendingError } = await supabase

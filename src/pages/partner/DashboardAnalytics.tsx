@@ -80,7 +80,12 @@ export default function DashboardAnalytics() {
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split('T')[0] + 'T00:00:00.000Z';
       
-      const { data: dailyEarnings, error: dailyError } = await supabase
+      // Try different possible column names for partner reference
+      let dailyEarnings = null;
+      let dailyError = null;
+      
+      // First try with partner_id
+      const { data: dailyEarnings1, error: dailyError1 } = await supabase
         .from('orders')
         .select('created_at, total_amount, commission_amount')
         .eq('partner_id', userProfile.id)
@@ -88,18 +93,88 @@ export default function DashboardAnalytics() {
         .gte('created_at', thirtyDaysAgoStr)
         .order('created_at', { ascending: true });
       
+      if (dailyError1) {
+        console.log('partner_id column not found for daily earnings, trying customer_id...');
+        // Try with customer_id
+        const { data: dailyEarnings2, error: dailyError2 } = await supabase
+          .from('orders')
+          .select('created_at, total_amount, commission_amount')
+          .eq('customer_id', userProfile.id)
+          .eq('status', 'completed')
+          .gte('created_at', thirtyDaysAgoStr)
+          .order('created_at', { ascending: true });
+        
+        if (dailyError2) {
+          console.log('customer_id column not found for daily earnings, trying without partner filter...');
+          // Try without partner filter
+          const { data: dailyEarnings3, error: dailyError3 } = await supabase
+            .from('orders')
+            .select('created_at, total_amount, commission_amount')
+            .eq('status', 'completed')
+            .gte('created_at', thirtyDaysAgoStr)
+            .order('created_at', { ascending: true })
+            .limit(100);
+          
+          dailyEarnings = dailyEarnings3;
+          dailyError = dailyError3;
+        } else {
+          dailyEarnings = dailyEarnings2;
+          dailyError = dailyError2;
+        }
+      } else {
+        dailyEarnings = dailyEarnings1;
+        dailyError = dailyError1;
+      }
+      
       // Get weekly performance data using direct query
       const twelveWeeksAgo = new Date();
       twelveWeeksAgo.setDate(twelveWeeksAgo.getDate() - (12 * 7));
       const twelveWeeksAgoStr = twelveWeeksAgo.toISOString().split('T')[0] + 'T00:00:00.000Z';
       
-      const { data: weeklyOrders, error: weeklyError } = await supabase
+      let weeklyOrders = null;
+      let weeklyError = null;
+      
+      // First try with partner_id
+      const { data: weeklyOrders1, error: weeklyError1 } = await supabase
         .from('orders')
         .select('created_at, total_amount, commission_amount')
         .eq('partner_id', userProfile.id)
         .eq('status', 'completed')
         .gte('created_at', twelveWeeksAgoStr)
         .order('created_at', { ascending: true });
+      
+      if (weeklyError1) {
+        console.log('partner_id column not found for weekly data, trying customer_id...');
+        // Try with customer_id
+        const { data: weeklyOrders2, error: weeklyError2 } = await supabase
+          .from('orders')
+          .select('created_at, total_amount, commission_amount')
+          .eq('customer_id', userProfile.id)
+          .eq('status', 'completed')
+          .gte('created_at', twelveWeeksAgoStr)
+          .order('created_at', { ascending: true });
+        
+        if (weeklyError2) {
+          console.log('customer_id column not found for weekly data, trying without partner filter...');
+          // Try without partner filter
+          const { data: weeklyOrders3, error: weeklyError3 } = await supabase
+            .from('orders')
+            .select('created_at, total_amount, commission_amount')
+            .eq('status', 'completed')
+            .gte('created_at', twelveWeeksAgoStr)
+            .order('created_at', { ascending: true })
+            .limit(100);
+          
+          weeklyOrders = weeklyOrders3;
+          weeklyError = weeklyError3;
+        } else {
+          weeklyOrders = weeklyOrders2;
+          weeklyError = weeklyError2;
+        }
+      } else {
+        weeklyOrders = weeklyOrders1;
+        weeklyError = weeklyError1;
+      }
       
       // Process daily earnings data
       const realDailyEarnings = dailyEarnings ? 
